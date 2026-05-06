@@ -258,7 +258,11 @@ ryotaneの相棒。
 # 🆕 新: 最小限のシステムプロンプト
 # =========================================
 def build_system_prompt(context: str):
-
+    # ワークスペースコンテキストを取得
+    from ai_agent.workspace.registry import WorkspaceRegistry
+    workspace = WorkspaceRegistry()
+    ws_context = workspace.get_context()
+    
     return f"""
 あなたはQueryQuest OS上で動作するAIアシスタントです。
 
@@ -267,7 +271,10 @@ def build_system_prompt(context: str):
 ・検索結果にない事実を捏造しないでください。
 ・不明な場合は「分かりません」と答えてください。
 
-【コンテキスト】
+【ワークスペースコンテキスト】
+{ws_context}
+
+【ユーザー関係性】
 {context}
 """
 
