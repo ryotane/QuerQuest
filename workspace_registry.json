@@ -1,11 +1,13 @@
 {
   "workspace_id": "queryquest_project",
-  "last_updated": "2026-05-06T00:00:00Z",
-  "summary": "QueryQuest プロジェクトの Workspace Continuity 実装中。Phase 1 で人格制御コードを legacy 化。Phase 2 でワークスペース状態の共有を開始。",
+  "last_updated": "2026-05-06T21:00:00Z",
+  "summary": "QueryQuest プロジェクトの Workspace Continuity 実装完了。Phase 1 で人格制御コードを legacy 化、Phase 2 でワークスペース状態の共有を完了。Continuity kernel の動作確認済み。LM Studio 通信問題は未解決だが後回し。",
   "recent_topics": [
     "Memory OS 設計",
     "人格制御コードの隔離",
-    "Workspace Continuity"
+    "Workspace Continuity",
+    "Workspace Registry 実装",
+    "system prompt 注入確認"
   ],
   "active_goals": [
     {
@@ -16,9 +18,27 @@
     },
     {
       "id": "goal_002",
-      "description": "Phase 2: Workspace Continuity 実装",
-      "status": "in_progress",
-      "created_at": "2026-05-06T10:00:00Z"
+      "description": "Phase 2: Workspace Continuity MVP 実装",
+      "status": "completed",
+      "completed_at": "2026-05-06T21:00:00Z"
+    },
+    {
+      "id": "goal_003",
+      "description": "Phase 3: workspace auto update 実装",
+      "status": "pending",
+      "created_at": "2026-05-06T21:00:00Z"
+    },
+    {
+      "id": "goal_004",
+      "description": "Phase 4: session continuity 実装",
+      "status": "pending",
+      "created_at": "2026-05-06T21:00:00Z"
+    },
+    {
+      "id": "goal_005",
+      "description": "Phase 5: LMStudioClient 修正",
+      "status": "pending",
+      "created_at": "2026-05-06T21:00:00Z"
     }
   ],
   "recent_decisions": [
@@ -26,6 +46,21 @@
       "id": "decision_001",
       "description": "人格は LLM 自身に任せる。QueryQuest は Continuity/Memory/Workflow OS として位置づける",
       "timestamp": "2026-05-06T07:00:00Z"
+    },
+    {
+      "id": "decision_002",
+      "description": "Phase 1 で人格制御コードを削除せず legacy_ として隔離",
+      "timestamp": "2026-05-06T07:30:00Z"
+    },
+    {
+      "id": "decision_003",
+      "description": "Workspace Continuity MVP を最小実装で開始。意図認識や自動要約は後回し",
+      "timestamp": "2026-05-06T10:00:00Z"
+    },
+    {
+      "id": "decision_004",
+      "description": "LM Studio 通信問題は後回し。まず workspace_registry.json の読み込みと system prompt 注入を確認",
+      "timestamp": "2026-05-06T21:00:00Z"
     }
   ],
   "related_chats": []
