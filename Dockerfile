@@ -1,0 +1,9 @@
+FROM python:3.11
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install fastapi uvicorn requests
+
+CMD ["uvicorn", "ai_agent.main:app", "--host", "0.0.0.0", "--port", "8100"]
