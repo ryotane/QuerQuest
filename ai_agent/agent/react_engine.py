@@ -62,10 +62,18 @@ class ReActEngine:
                 trace.append({"step": 1, "search_error": str(e)})
 
         # ④ プロンプト構築
+        # 🔥 LEGACY: 旧システムプロンプト（隔離）
+        LEGACY_SYSTEM_PROMPT_CHAT = "あなたは親切なAIです。日本語で簡潔に答えてください。"
+        LEGACY_SYSTEM_PROMPT_CODE = "あなたはSwift/Xcodeの専門家です。日本語で技術的に正確に答えてください。"
+
+        # 🆕 新: システムプロンプト
+        SYSTEM_PROMPT_CHAT = "あなたはAIアシスタントです。日本語で答えてください。"
+        SYSTEM_PROMPT_CODE = "あなたはプログラミングアシスタントです。技術的に正確に答えてください。"
+
         if action == "code":
-            system = "あなたはSwift/Xcodeの専門家です。日本語で技術的に正確に答えてください。"
+            system = SYSTEM_PROMPT_CODE
         else:
-            system = "あなたは親切なAIです。日本語で簡潔に答えてください。"
+            system = SYSTEM_PROMPT_CHAT
 
         user_content = f"""
 質問:

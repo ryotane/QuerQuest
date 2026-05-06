@@ -216,9 +216,9 @@ def web_search(query: str):
 
 
 # =========================================
-# 🧠 System Prompt
+# 🔥 LEGACY: 旧システムプロンプト（隔離）
 # =========================================
-def build_system_prompt(context: str):
+def build_legacy_system_prompt(context: str):
 
     return f"""
 あなたはQueryQuest。
@@ -250,6 +250,24 @@ ryotaneの相棒。
 モデル自身の自然な個性を活かす。
 
 【関係性】
+{context}
+"""
+
+
+# =========================================
+# 🆕 新: 最小限のシステムプロンプト
+# =========================================
+def build_system_prompt(context: str):
+
+    return f"""
+あなたはQueryQuest OS上で動作するAIアシスタントです。
+
+【制約】
+・検索結果が存在する場合はそれを優先して使用してください。
+・検索結果にない事実を捏造しないでください。
+・不明な場合は「分かりません」と答えてください。
+
+【コンテキスト】
 {context}
 """
 
@@ -311,9 +329,9 @@ def generate_answer(
 
 
 # =========================================
-# 🔍 Verify
+# 🔥 LEGACY: 旧検証（隔離）
 # =========================================
-def verify_answer(
+def legacy_verify_answer(
     query,
     answer,
     facts
@@ -342,9 +360,25 @@ def verify_answer(
 
 
 # =========================================
-# ✨ Cleanup
+# 🆕 新: 検証（事実チェックのみ）
 # =========================================
-def cleanup_answer(text):
+def verify_answer(
+    query,
+    answer,
+    facts
+):
+
+    # 検索が必要だったのに事実がない場合は警告
+    if should_search(query) and facts == []:
+        return "検索結果が見つかりませんでした。別の質問を試してください。"
+
+    return answer
+
+
+# =========================================
+# 🔥 LEGACY: 旧後処理（隔離）
+# =========================================
+def legacy_cleanup_answer(text):
 
     text = re.sub(r"\n{3,}", "\n\n", text)
 
@@ -367,6 +401,16 @@ def cleanup_answer(text):
         result += "。"
 
     return result
+
+
+# =========================================
+# 🆕 新: 後処理（基本的な改行処理のみ）
+# =========================================
+def cleanup_answer(text):
+
+    # 連続する改行を整理するのみ
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
 # =========================================
