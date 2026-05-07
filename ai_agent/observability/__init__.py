@@ -26,6 +26,20 @@ from .loop_risk_score import LoopRiskCalculator
 from .compression_efficiency import CompressionEfficiencyMonitor
 from .archive_ratio import ArchiveRatioMonitor
 from .status_export import StatusExporter, export_health_status
+from .telemetry_scheduler import (
+    TelemetryScheduler,
+    TelemetryConfig,
+    TelemetryState,
+    TelemetrySnapshot,
+    create_scheduler,
+)
+from .live_health_stream import (
+    LiveHealthStream,
+    HealthEvent,
+    HealthEventType,
+    create_health_stream,
+)
+from .runtime_metrics_collector import RuntimeMetricsCollector
 
 __all__ = [
     # Core
@@ -44,4 +58,15 @@ __all__ = [
     "ArchiveRatioMonitor",
     "StatusExporter",
     "export_health_status",
+    # Runtime Telemetry
+    "TelemetryScheduler",
+    "TelemetryConfig",
+    "TelemetryState",
+    "TelemetrySnapshot",
+    "create_scheduler",
+    "LiveHealthStream",
+    "HealthEvent",
+    "HealthEventType",
+    "create_health_stream",
+    "RuntimeMetricsCollector",
 ]
