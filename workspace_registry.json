@@ -1,7 +1,7 @@
 {
   "workspace_id": "queryquest_project",
   "last_updated": "2026-05-06T21:00:00Z",
-  "summary": "QueryQuest プロジェクトの Workspace Continuity 実装完了。Phase 1 で人格制御コードを legacy 化、Phase 2 でワークスペース状態の共有を完了。Continuity kernel の動作確認済み。LM Studio 通信問題は未解決だが後回し。",
+  "summary": "QueryQuest プロジェクトの Workspace Continuity 実装完了。Phase 1 で人格制御コードを legacy 化、Phase 2 でワークスペース状態の共有を完了。Continuity kernel の動作確認済み。LM Studio 通信問題は後回し。",
   "recent_topics": [
     "Memory OS 設計",
     "人格制御コードの隔離",
@@ -30,8 +30,8 @@
     },
     {
       "id": "goal_004",
-      "description": "Phase 4: session continuity 実装",
-      "status": "pending",
+      "description": "Phase 4: session continuity MVP 実装",
+      "status": "in_progress",
       "created_at": "2026-05-06T21:00:00Z"
     },
     {
@@ -54,12 +54,12 @@
     },
     {
       "id": "decision_003",
-      "description": "Workspace Continuity MVP を最小実装で開始。意図認識や自動要約は後回し",
+      "description": "Workspace Continuity MVP を最小実装で開始。intent detection や auto summarization は後回し",
       "timestamp": "2026-05-06T10:00:00Z"
     },
     {
       "id": "decision_004",
-      "description": "LM Studio 通信問題は後回し。まず workspace_registry.json の読み込みと system prompt 注入を確認",
+      "description": "Continuity kernel の動作確認完了。system prompt への注入が正常に動作していることを確認",
       "timestamp": "2026-05-06T21:00:00Z"
     }
   ],
