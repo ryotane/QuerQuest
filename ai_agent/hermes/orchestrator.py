@@ -589,6 +589,37 @@ class Orchestrator:
                 query=query,
                 answer=final
             )
+            
+            # 自動マージチェック（同一タイトルまたは高関連度）
+            try:
+                from ai_agent.workspace.session_registry import SessionRegistry
+                registry = SessionRegistry()
+                
+                # 同一タイトルのセッションを検索
+                existing = registry.find_session_by_title(title.split('_')[-1] if '_' in title else title)
+                
+                if existing and existing.get("chat_id") != chat_id:
+                    # 高関連度セッションがある場合、自動マージを提案
+                    high_score_results = registry.find_sessions_by_keywords(
+                        [title.split('_')[-1] if '_' in title else title],
+                        limit=5
+                    )
+                    
+                    high_score = [r for r in high_score_results if r[1] >= 5]
+                    
+                    if high_score:
+                        print(f"\n🔄 自動マージ候補検出: {len(high_score)}件")
+                        # 実際のマージはユーザー確認後（MVP 段階ではログのみ）
+            except Exception as e:
+                print(f"⚠️ 自動マージチェック失敗: {e}")
+            
+            # プロジェクトマスタードキュメントを更新
+            try:
+                from ai_agent.workspace.project_master import generate_project_master
+                master = generate_project_master("queryquest_project")
+                print(f"\n📊 プロジェクトマスター更新完了 (セッション数：{master['session_count']})")
+            except Exception as e:
+                print(f"⚠️ プロジェクトマスター更新失敗: {e}")
         except Exception as e:
             print(f"⚠️ Session auto-save failed: {e}")
 

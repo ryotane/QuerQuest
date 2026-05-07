@@ -166,3 +166,128 @@ class SessionRegistry:
                      reverse=True)
         
         return results[:limit]
+    
+    def merge_sessions(self, target_chat_id: str, source_sessions: list) -> dict:
+        """
+        複数のセッションを 1 つにマージ（知見の統合）
+        
+        既存セッションに上書きではなく、知見をマージ。
+        マージ前のセッションは archive フォルダへ移動。
+        
+        Args:
+            target_chat_id: 対象となる既存セッションの chat_id
+            source_sessions: マージするセッションのリスト
+        
+        Returns:
+            マージ後のセッションデータ
+        """
+        import shutil
+        import os
+        
+        # 対象セッションを検索
+        target = None
+        target_idx = None
+        for i, session in enumerate(self.data.get("sessions", [])):
+            if session.get("chat_id") == target_chat_id:
+                target = session
+                target_idx = i
+                break
+        
+        if not target:
+            raise ValueError(f"Target session not found: {target_chat_id}")
+        
+        # マージ前のセッションを archive へ移動
+        archive_dir = os.path.join(os.path.dirname(self.path), "archive")
+        os.makedirs(archive_dir, exist_ok=True)
+        
+        archived_ids = []
+        for session in source_sessions:
+            chat_id = session.get("chat_id")
+            if chat_id != target_chat_id:
+                # archive ファイルへ保存
+                archive_path = os.path.join(archive_dir, f"{chat_id}.json")
+                with open(archive_path, "w", encoding="utf-8") as f:
+                    json.dump(session, f, indent=2, ensure_ascii=False)
+                archived_ids.append(chat_id)
+        
+        # 知見のマージ
+        merged_summary = target.get("summary", "")
+        merged_topics = list(set(target.get("recent_topics", [])))
+        merged_goals = target.get("active_goals", [])
+        merged_next_actions = target.get("next_actions", [])
+        
+        for session in source_sessions:
+            if session.get("chat_id") == target_chat_id:
+                continue
+            
+            # サマリーを結合（重複除去）
+            if session.get("summary"):
+                merged_summary += f"\n\n[元セッション {session.get('title', 'Untitled')}] {session['summary']}"
+            
+            # トピックをマージ
+            for topic in session.get("recent_topics", []):
+                if topic not in merged_topics:
+                    merged_topics.append(topic)
+            
+            # ゴールをマージ
+            for goal in session.get("active_goals", []):
+                if goal not in merged_goals:
+                    merged_goals.append(goal)
+            
+            # next_actions をマージ
+            for action in session.get("next_actions", []):
+                if action not in merged_next_actions:
+                    merged_next_actions.append(action)
+        
+        # 更新
+        target["summary"] = merged_summary
+        target["recent_topics"] = merged_topics[-20:]  # 最大 20 件
+        target["active_goals"] = merged_goals
+        target["next_actions"] = merged_next_actions
+        target["merged_from"] = archived_ids
+        target["merged_at"] = datetime.now().isoformat()
+        target["updated_at"] = datetime.now().isoformat()
+        
+        self.save()
+        
+        return target
+    
+    def get_project_sessions(self, workspace_id: str) -> list:
+        """
+        特定のワークスペースに属する全セッションを取得
+        
+        Args:
+            workspace_id: ワークスペース ID
+        
+        Returns:
+            該当する全セッションのリスト
+        """
+        return [
+            session for session in self.data.get("sessions", [])
+            if session.get("workspace_id") == workspace_id
+        ]
+    
+    def get_all_next_actions(self, workspace_id: str = None) -> list:
+        """
+        全セッションの next_actions を集約
+        
+        Args:
+            workspace_id: ワークスペース ID（指定時はそのワークスペースのみ）
+        
+        Returns:
+            集約された next_actions のリスト
+        """
+        sessions = self.data.get("sessions", [])
+        
+        if workspace_id:
+            sessions = [
+                s for s in sessions if s.get("workspace_id") == workspace_id
+            ]
+        
+        all_actions = []
+        for session in sessions:
+            for action in session.get("next_actions", []):
+                if action not in all_actions:
+                    all_actions.append(action)
+        
+        return all_actions

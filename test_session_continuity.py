@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai_agent.workspace.session_registry import SessionRegistry
 from ai_agent.workspace.session_context import build_session_context, inject_session_context, build_multi_session_context, build_combined_context
 from ai_agent.workspace.intent import analyze_intent, detect_continuity_intent, detect_multi_session_intent, extract_search_keywords
-from ai_agent.workspace.session_auto_save import extract_topics, generate_summary, extract_next_actions, auto_save_session
+from ai_agent.workspace.session_auto_save import extract_topics, generate_summary, extract_next_actions, auto_save_session, distill_knowledge, auto_merge_sessions
+from ai_agent.workspace.project_master import generate_project_master, load_project_master
 
 
 def test_session_registry():
@@ -215,6 +216,95 @@ def test_intent_detection_advanced():
             print(f"     キーワード: {intent['keywords']}")
 
 
+def test_session_merge():
+    """セッションマージ機能テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 セッションマージ機能 テスト")
+    print("=" * 60)
+    
+    registry = SessionRegistry()
+    
+    # テスト用のセッションを作成
+    test_sessions = [
+        {
+            "chat_id": "chat_merge_test_001",
+            "title": "テストセッション A",
+            "summary": "テスト A の要約",
+            "recent_topics": ["テスト", "A"],
+            "active_goals": ["ゴール A"],
+            "next_actions": ["タスク A1", "タスク A2"],
+            "updated_at": "2026-05-07T10:00:00Z"
+        },
+        {
+            "chat_id": "chat_merge_test_002",
+            "title": "テストセッション B",
+            "summary": "テスト B の要約",
+            "recent_topics": ["テスト", "B"],
+            "active_goals": ["ゴール B"],
+            "next_actions": ["タスク B1", "タスク B2"],
+            "updated_at": "2026-05-07T11:00:00Z"
+        }
+    ]
+    
+    # セッションを追加
+    for session in test_sessions:
+        registry.update_session(
+            chat_id=session["chat_id"],
+            title=session["title"],
+            summary=session["summary"],
+            recent_topics=session["recent_topics"],
+            active_goals=session["active_goals"],
+            last_user_intent="テスト"
+        )
+        # next_actions を直接追加
+        import json
+        with open(registry.path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        for s in data["sessions"]:
+            if s["chat_id"] == session["chat_id"]:
+                s["next_actions"] = session["next_actions"]
+        with open(registry.path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    
+    # マージ実行
+    print("\n🔄 マージ実行:")
+    merged = registry.merge_sessions(
+        target_chat_id="chat_merge_test_001",
+        source_sessions=test_sessions
+    )
+    
+    print(f"  ✅ マージ完了: {merged['title']}")
+    print(f"  サマリー: {merged.get('summary', '')[:100]}...")
+    print(f"  トピック: {merged.get('recent_topics', [])}")
+    print(f"  next_actions: {merged.get('next_actions', [])}")
+    print(f"  merged_from: {merged.get('merged_from', [])}")
+
+
+def test_project_master():
+    """プロジェクトマスタードキュメント生成テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 プロジェクトマスタードキュメント テスト")
+    print("=" * 60)
+    
+    # 生成
+    master = generate_project_master("queryquest_project")
+    
+    print(f"\n📊 プロジェクトマスター:")
+    print(f"  workspace_id: {master['workspace_id']}")
+    print(f"  セッション数: {master['session_count']}")
+    print(f"  重要トピック: {master['important_topics'][:5]}")
+    print(f"  未完了タスク数: {len(master['unfinished_tasks'])}")
+    
+    if master['unfinished_tasks']:
+        print(f"\n📋 未完了タスクリスト (上位 5 件):")
+        for i, task in enumerate(master['unfinished_tasks'][:5], 1):
+            print(f"  {i}. {task}")
+    
+    # 読み込みテスト
+    loaded = load_project_master("queryquest_project")
+    print(f"\n✅ 読み込みテスト完了: {loaded['workspace_id']}")
+
+
 def main():
     """メインテスト実行"""
     print("\n" + "=" * 60)
@@ -228,6 +318,8 @@ def main():
         test_auto_save()
         test_session_search()
         test_intent_detection_advanced()
+        test_session_merge()
+        test_project_master()
         
         print("\n" + "=" * 60)
         print("✅ 全テスト完了")

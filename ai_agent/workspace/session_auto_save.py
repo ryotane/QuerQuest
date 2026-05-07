@@ -201,3 +201,144 @@ def auto_save_session(
             json.dump(data, f, indent=2, ensure_ascii=False)
     
     return updated
+
+
+def distill_knowledge(sessions: list) -> dict:
+    """
+    複数のセッションから知識を蒸留（統合サマリー生成）
+    
+    LLM に重複を削ぎ、抽象度の高い情報だけを抽出させる。
+    
+    Args:
+        sessions: マージ対象のセッションリスト
+    
+    Returns:
+        蒸留された知識（統合サマリー、重要トピック、未完了タスク）
+    """
+    try:
+        # セッション情報をテキスト化
+        session_texts = []
+        for session in sessions:
+            text = f"""
+【セッション: {session.get('title', 'Untitled')}】
+要約: {session.get('summary', '')}
+トピック: {', '.join(session.get('recent_topics', []))}
+ゴール: {', '.join(session.get('active_goals', []))}
+next_actions: {', '.join(session.get('next_actions', []))}
+"""
+            session_texts.append(text)
+        
+        combined_text = "\n".join(session_texts)
+        
+        prompt = f"""
+以下の複数のセッションから、以下の情報を抽出してください。
+
+【セッション一覧】
+{combined_text[:3000]}
+
+【出力形式】
+統合サマリー: <350 文字程度の統合サマリー>
+重要トピック: <重複を除いた重要トピックのリスト>
+未完了タスク: <next_actions から重複を除いたタスクリスト>
+
+出力形式例:
+統合サマリー: ...
+重要トピック:
+- トピック 1
+- トピック 2
+未完了タスク:
+1. タスク 1
+2. タスク 2
+
+重要トピックと未完了タスクのみを抽出してください。
+"""
+        
+        result = llm.chat([
+            {"role": "user", "content": prompt}
+        ])
+        
+        # 結果をパース
+        distilled = {
+            "integrated_summary": "",
+            "important_topics": [],
+            "unfinished_tasks": []
+        }
+        
+        # 統合サマリー抽出
+        match = re.search(r"統合サマリー:\s*(.+?)(?=重要トピック|$)", result, re.IGNORECASE | re.DOTALL)
+        if match:
+            distilled["integrated_summary"] = match.group(1).strip()[:350]
+        
+        # 重要トピック抽出
+        topics_section = re.search(r"重要トピック:\s*(.+?)(?=未完了タスク|$)", result, re.IGNORECASE | re.DOTALL)
+        if topics_section:
+            for line in topics_section.group(1).split('\n'):
+                line = line.strip().lstrip('-•').strip()
+                if line:
+                    distilled["important_topics"].append(line)
+        
+        # 未完了タスク抽出
+        tasks_section = re.search(r"未完了タスク:\s*(.+)", result, re.IGNORECASE | re.DOTALL)
+        if tasks_section:
+            for line in tasks_section.group(1).split('\n'):
+                line = line.strip()
+                if re.match(r'^\d+\.', line):
+                    task = re.sub(r'^\d+\.\s*', '', line)
+                    if task:
+                        distilled["unfinished_tasks"].append(task)
+        
+        return distilled
+    
+    except Exception as e:
+        print(f"❌ 知識蒸留エラー: {e}")
+        return {
+            "integrated_summary": "",
+            "important_topics": [],
+            "unfinished_tasks": []
+        }
+
+
+def auto_merge_sessions(
+    registry,
+    target_chat_id: str,
+    source_sessions: list,
+    use_distillation: bool = True
+) -> dict:
+    """
+    セッションの自動マージ（知識蒸留付き）
+    
+    Args:
+        registry: SessionRegistry インスタンス
+        target_chat_id: 対象セッションの chat_id
+        source_sessions: マージするセッションリスト
+        use_distillation: 知識蒸留を使用するかどうか
+    
+    Returns:
+        マージ後のセッションデータ
+    """
+    # 既存のマージ
+    merged = registry.merge_sessions(target_chat_id, source_sessions)
+    
+    # 知識蒸留
+    if use_distillation:
+        distilled = distill_knowledge(source_sessions)
+        
+        # 統合サマリーで更新
+        if distilled["integrated_summary"]:
+            merged["summary"] = distilled["integrated_summary"]
+        
+        # 重要トピックで更新
+        if distilled["important_topics"]:
+            merged["recent_topics"] = distilled["important_topics"]
+        
+        # 未完了タスクで更新
+        if distilled["unfinished_tasks"]:
+            merged["next_actions"] = distilled["unfinished_tasks"]
+        
+        # 蒸留メタデータを追加
+        merged["distilled_at"] = datetime.now().isoformat()
+        merged["distilled_from_count"] = len(source_sessions)
+        
+        registry.save()
+    
+    return merged
