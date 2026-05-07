@@ -132,6 +132,8 @@ def auto_save_session(
     """
     セッション情報を自動抽出して保存
     
+    安定化ルールを適用して保存。
+    
     Args:
         chat_id: セッション ID
         title: タイトル
@@ -145,8 +147,10 @@ def auto_save_session(
         保存されたセッションデータ
     """
     from ai_agent.workspace.session_registry import SessionRegistry
+    from ai_agent.workspace.memory_stabilization import MemoryStabilizer
     
     registry = SessionRegistry()
+    stabilizer = MemoryStabilizer()
     
     # 既存セッションを取得
     existing = registry.get_session(chat_id)
@@ -171,14 +175,25 @@ def auto_save_session(
     # ゴールの更新（既存があれば維持）
     goals = existing_goals or []
     
+    # セッションデータを検証・修正（安定化ルール適用）
+    session_data = {
+        "chat_id": chat_id,
+        "title": title,
+        "summary": summary,
+        "recent_topics": all_topics,
+        "active_goals": goals,
+        "last_user_intent": query[:100]
+    }
+    validated_data = stabilizer.validate_session_data(session_data)
+    
     # セッションの更新
     updated = registry.update_session(
         chat_id=chat_id,
-        title=title,
-        summary=summary,
-        recent_topics=all_topics,
-        active_goals=goals,
-        last_user_intent=query[:100]  # 意図は質問の先頭100文字
+        title=validated_data["title"],
+        summary=validated_data["summary"],
+        recent_topics=validated_data["recent_topics"],
+        active_goals=validated_data["active_goals"],
+        last_user_intent=validated_data["last_user_intent"]
     )
     
     # next_actions を直接追加（update_session に含まれていないため）

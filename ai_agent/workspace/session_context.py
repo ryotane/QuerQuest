@@ -1,6 +1,15 @@
 # ai_agent/workspace/session_context.py
 
 from ai_agent.workspace.session_registry import SessionRegistry
+from ai_agent.workspace.memory_stabilization import MemoryStabilizer
+
+# グローバル安定化インスタンス
+_stabilizer = MemoryStabilizer()
+
+
+def get_stabilizer() -> MemoryStabilizer:
+    """安定化インスタンスを取得"""
+    return _stabilizer
 
 
 def build_session_context(registry: SessionRegistry, limit: int = 3) -> str:
@@ -16,48 +25,8 @@ def build_session_context(registry: SessionRegistry, limit: int = 3) -> str:
     Returns:
         生成されたコンテキストテキスト
     """
-    sessions = registry.get_recent_sessions(limit=limit)
-    
-    if not sessions:
-        return ""
-    
-    context_parts = []
-    
-    for i, session in enumerate(sessions, 1):
-        section = []
-        
-        # タイトル
-        title = session.get("title", "Untitled")
-        section.append(f"【セッション {i}: {title}】")
-        
-        # サマリー
-        summary = session.get("summary", "")
-        if summary:
-            section.append(f"  要約: {summary}")
-        
-        # 最近のトピック
-        topics = session.get("recent_topics", [])
-        if topics:
-            section.append(f"  トピック: {', '.join(topics[:5])}")
-        
-        # アクティブゴール
-        goals = session.get("active_goals", [])
-        if goals:
-            section.append(f"  目標: {'; '.join(goals[:3])}")
-        
-        # 最後のユーザー意図
-        intent = session.get("last_user_intent", "")
-        if intent:
-            section.append(f"  意図: {intent}")
-        
-        # 更新日時
-        updated = session.get("updated_at", "")
-        if updated:
-            section.append(f"  更新: {updated}")
-        
-        context_parts.append("\n".join(section))
-    
-    return "\n\n".join(context_parts)
+    # 安定化モジュールを使用
+    return _stabilizer.build_safe_context(registry, limit)
 
 
 def inject_session_context(system_prompt: str, registry: SessionRegistry, 

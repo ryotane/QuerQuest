@@ -173,6 +173,7 @@ class SessionRegistry:
         
         既存セッションに上書きではなく、知見をマージ。
         マージ前のセッションは archive フォルダへ移動。
+        安定化ルールを適用。
         
         Args:
             target_chat_id: 対象となる既存セッションの chat_id
@@ -183,6 +184,7 @@ class SessionRegistry:
         """
         import shutil
         import os
+        from ai_agent.workspace.memory_stabilization import SummaryCompressor, ContextDeduplicator
         
         # 対象セッションを検索
         target = None
@@ -209,6 +211,10 @@ class SessionRegistry:
                 with open(archive_path, "w", encoding="utf-8") as f:
                     json.dump(session, f, indent=2, ensure_ascii=False)
                 archived_ids.append(chat_id)
+        
+        # 安定化モジュール
+        compressor = SummaryCompressor()
+        deduplicator = ContextDeduplicator()
         
         # 知見のマージ
         merged_summary = target.get("summary", "")
@@ -238,6 +244,11 @@ class SessionRegistry:
             for action in session.get("next_actions", []):
                 if action not in merged_next_actions:
                     merged_next_actions.append(action)
+        
+        # 安定化ルールを適用
+        merged_summary = compressor.compress_summary(merged_summary, 500)
+        merged_topics = deduplicator.deduplicate_topics(merged_topics)
+        merged_goals = compressor.compress_goals(merged_goals, 300)
         
         # 更新
         target["summary"] = merged_summary
