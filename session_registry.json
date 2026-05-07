@@ -1,0 +1,36 @@
+{
+  "sessions": [
+    {
+      "chat_id": "chat_001",
+      "title": "QueryQuest Project_01",
+      "workspace_id": "queryquest_project",
+      "summary": "Workspace Continuity MVP 実装完了。session continuity の設計を開始。",
+      "recent_topics": [
+        "workspace registry",
+        "session continuity",
+        "Memory OS"
+      ],
+      "active_goals": [
+        "Phase 4: session continuity MVP"
+      ],
+      "last_user_intent": "Session Continuity MVP を実装したい",
+      "updated_at": "2026-05-06T23:00:00Z"
+    },
+    {
+      "chat_id": "chat_test_001",
+      "title": "テストセッション",
+      "workspace_id": "queryquest_project",
+      "summary": "テスト用の要約",
+      "recent_topics": [
+        "テスト",
+        "MVP"
+      ],
+      "active_goals": [
+        "Phase 4: session continuity"
+      ],
+      "last_user_intent": "テスト意図",
+      "updated_at": "2026-05-07T11:28:15.822995"
+    }
+  ],
+  "last_updated": "2026-05-07T11:28:15.823000"
+}

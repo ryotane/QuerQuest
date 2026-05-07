@@ -263,7 +263,13 @@ def build_system_prompt(context: str):
     workspace = WorkspaceRegistry()
     ws_context = workspace.get_context()
     
-    return f"""
+    # セッションコンテキストを取得
+    from ai_agent.workspace.session_registry import SessionRegistry
+    from ai_agent.workspace.session_context import inject_session_context
+    session_registry = SessionRegistry()
+    
+    # 基本システムプロンプト
+    base_prompt = f"""
 あなたはQueryQuest OS上で動作するAIアシスタントです。
 
 【制約】
@@ -277,6 +283,18 @@ def build_system_prompt(context: str):
 【ユーザー関係性】
 {context}
 """
+    
+    # セッションコンテキストを prepend
+    full_prompt = inject_session_context(base_prompt, session_registry, limit=3)
+    
+    # 🔍 DEBUG: system prompt をログ出力
+    print("\n" + "="*60)
+    print("🔍 SYSTEM PROMPT (DEBUG)")
+    print("="*60)
+    print(full_prompt)
+    print("="*60 + "\n")
+    
+    return full_prompt
 
 
 # =========================================
@@ -433,6 +451,16 @@ class Orchestrator:
 
         print(f"\n🧠 {query}")
 
+        # =====================================
+        # 🎯 Intent Detection
+        # =====================================
+        from ai_agent.workspace.intent import analyze_intent
+        intent = analyze_intent(query)
+        
+        if intent["type"] in ["continuity", "session_search"]:
+            print(f"🎯 CONTINUITY INTENT DETECTED: {intent['type']}")
+            print(f"   Keyword: {intent['keyword']}")
+        
         # =====================================
         # 🧠 Memory
         # =====================================
