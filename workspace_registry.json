@@ -51,6 +51,12 @@
       "description": "Phase 7: セッション自動マージとナレッジベース昇華",
       "status": "completed",
       "completed_at": "2026-05-07T13:00:00Z"
+    },
+    {
+      "id": "goal_008",
+      "description": "Phase 8: 動的プランニングと自己反省 (Self-Reflection)",
+      "status": "completed",
+      "completed_at": "2026-05-07T14:00:00Z"
     }
   ],
   "recent_decisions": [
