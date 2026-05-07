@@ -45,6 +45,12 @@
       "description": "Phase 6: セッション検索とマルチセッションコンテキスト統合",
       "status": "completed",
       "completed_at": "2026-05-07T12:30:00Z"
+    },
+    {
+      "id": "goal_007",
+      "description": "Phase 7: セッション自動マージとナレッジベース昇華",
+      "status": "completed",
+      "completed_at": "2026-05-07T13:00:00Z"
     }
   ],
   "recent_decisions": [
