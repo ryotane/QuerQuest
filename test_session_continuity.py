@@ -10,8 +10,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ai_agent.workspace.session_registry import SessionRegistry
-from ai_agent.workspace.session_context import build_session_context, inject_session_context
-from ai_agent.workspace.intent import analyze_intent, detect_continuity_intent
+from ai_agent.workspace.session_context import build_session_context, inject_session_context, build_multi_session_context, build_combined_context
+from ai_agent.workspace.intent import analyze_intent, detect_continuity_intent, detect_multi_session_intent, extract_search_keywords
 from ai_agent.workspace.session_auto_save import extract_topics, generate_summary, extract_next_actions, auto_save_session
 
 
@@ -162,6 +162,59 @@ def test_auto_save():
         traceback.print_exc()
 
 
+def test_session_search():
+    """セッション検索機能テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 セッション検索機能 テスト")
+    print("=" * 60)
+    
+    registry = SessionRegistry()
+    
+    # キーワード検索テスト
+    keywords = ["Session", "Continuity"]
+    results = registry.find_sessions_by_keywords(keywords, limit=5)
+    
+    print(f"\n🔍 キーワード検索: {keywords}")
+    print(f"   結果: {len(results)}件")
+    
+    for i, (session, score) in enumerate(results, 1):
+        print(f"   {i}. {session['title']} (関連度: {score})")
+        print(f"      要約: {session.get('summary', '')[:50]}...")
+    
+    # 複数セッション結合テスト
+    if results:
+        print("\n🔗 マルチセッションコンテキスト生成:")
+        context = build_multi_session_context(registry, results, max_total_chars=1000)
+        print(context[:500] + "...")
+
+
+def test_intent_detection_advanced():
+    """高度な意図認識テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 高度な意図認識 テスト")
+    print("=" * 60)
+    
+    test_cases = [
+        ("前のチャットの続きをやりたい", "continuity"),
+        ("あのプロジェクトの続き", "continuity"),
+        ("この作業を再開したい", "continuity"),
+        ("前のチャットは何だったっけ", "session_search"),
+        ("Session Continuity について話した過去のチャットを探して", "session_search"),
+        ("Session と Registry の内容を踏まえて新しい機能を考えて", "multi_session"),
+        ("A と B の両方を合わせて", "multi_session"),
+        ("こんにちは", "normal"),
+        ("天気教えて", "normal"),
+    ]
+    
+    for query, expected_type in test_cases:
+        intent = analyze_intent(query)
+        status = "✅" if intent["type"] == expected_type else "❌"
+        print(f"  {status} '{query}'")
+        print(f"     結果: {intent['type']} (期待: {expected_type})")
+        if intent['keywords']:
+            print(f"     キーワード: {intent['keywords']}")
+
+
 def main():
     """メインテスト実行"""
     print("\n" + "=" * 60)
@@ -173,6 +226,8 @@ def main():
         test_session_context()
         test_intent_detection()
         test_auto_save()
+        test_session_search()
+        test_intent_detection_advanced()
         
         print("\n" + "=" * 60)
         print("✅ 全テスト完了")

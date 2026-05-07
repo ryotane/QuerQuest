@@ -258,7 +258,7 @@ ryotaneの相棒。
 # =========================================
 # 🆕 新: 最小限のシステムプロンプト
 # =========================================
-def build_system_prompt(context: str):
+def build_system_prompt(context: str, session_context_override: str = None):
     # ワークスペースコンテキストを取得
     from ai_agent.workspace.registry import WorkspaceRegistry
     workspace = WorkspaceRegistry()
@@ -285,8 +285,18 @@ def build_system_prompt(context: str):
 {context}
 """
     
-    # セッションコンテキストを prepend
-    full_prompt = inject_session_context(base_prompt, session_registry, limit=3)
+    # セッションコンテキストを注入
+    if session_context_override:
+        # オーバーライドがある場合はそちらを使用
+        full_prompt = f"""【結合されたセッションコンテキスト】
+{session_context_override}
+
+---
+
+{base_prompt}"""
+    else:
+        # デフォルトの直近セッションを使用
+        full_prompt = inject_session_context(base_prompt, session_registry, limit=3)
     
     # 🔍 DEBUG: system prompt をログ出力
     print("\n" + "="*60)
@@ -304,10 +314,11 @@ def build_system_prompt(context: str):
 def generate_answer(
     query,
     facts,
-    context
+    context,
+    session_context_override: str = None
 ):
 
-    system_prompt = build_system_prompt(context)
+    system_prompt = build_system_prompt(context, session_context_override)
 
     # =====================================
     # 🔵 Search Mode
@@ -458,9 +469,46 @@ class Orchestrator:
         from ai_agent.workspace.intent import analyze_intent
         intent = analyze_intent(query)
         
-        if intent["type"] in ["continuity", "session_search"]:
+        if intent["type"] in ["continuity", "session_search", "multi_session"]:
             print(f"🎯 CONTINUITY INTENT DETECTED: {intent['type']}")
             print(f"   Keyword: {intent['keyword']}")
+            print(f"   Keywords: {intent['keywords']}")
+        
+        # =====================================
+        # 🔍 Session Search (if needed)
+        # =====================================
+        session_context_override = None
+        
+        if intent["type"] == "session_search" and intent["keywords"]:
+            # セッション検索
+            from ai_agent.workspace.session_registry import SessionRegistry
+            registry = SessionRegistry()
+            results = registry.find_sessions_by_keywords(intent["keywords"], limit=5)
+            
+            if results:
+                print(f"\n📋 検索結果 ({len(results)}件):")
+                for i, (session, score) in enumerate(results, 1):
+                    print(f"  {i}. {session['title']} (関連度: {score})")
+                    print(f"     要約: {session.get('summary', '')[:50]}...")
+            else:
+                print("\n⚠️ 該当するセッションが見つかりませんでした。")
+        
+        elif intent["type"] == "multi_session" and intent["keywords"]:
+            # 複数セッション結合
+            from ai_agent.workspace.session_registry import SessionRegistry
+            from ai_agent.workspace.session_context import build_multi_session_context
+            
+            registry = SessionRegistry()
+            results = registry.find_sessions_by_keywords(intent["keywords"], limit=3)
+            
+            if results:
+                # 関連度順に結合（最大 2000 文字）
+                session_context_override = build_multi_session_context(
+                    registry, results, max_total_chars=2000
+                )
+                print(f"\n🔗 マルチセッションコンテキスト結合完了")
+            else:
+                print("\n⚠️ 該当するセッションが見つかりませんでした。")
         
         # =====================================
         # 🧠 Memory
@@ -495,7 +543,8 @@ class Orchestrator:
         draft = generate_answer(
             query,
             facts,
-            context
+            context,
+            session_context_override=session_context_override
         )
 
         # =====================================

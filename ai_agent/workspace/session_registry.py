@@ -118,3 +118,51 @@ class SessionRegistry:
         self.data["sessions"].append(new_session)
         self.save()
         return new_session
+    
+    def find_sessions_by_keywords(self, keywords: list, limit: int = 10) -> list:
+        """
+        キーワードでセッションを検索（複数キーワード対応）
+        
+        recent_topics と summary から部分一致で検索。
+        関連度スコア付きで返す。
+        
+        Args:
+            keywords: 検索キーワードのリスト
+            limit: 返す最大件数
+        
+        Returns:
+            [(session, score), ...] 関連度順にソート
+        """
+        sessions = self.data.get("sessions", [])
+        results = []
+        
+        for session in sessions:
+            score = 0
+            
+            # タイトルでの検索（重み高）
+            title = session.get("title", "").lower()
+            for kw in keywords:
+                if kw.lower() in title:
+                    score += 3
+            
+            # トピックでの検索（重み中）
+            topics = session.get("recent_topics", [])
+            for topic in topics:
+                for kw in keywords:
+                    if kw.lower() in topic.lower():
+                        score += 2
+            
+            # サマリーでの検索（重み低）
+            summary = session.get("summary", "").lower()
+            for kw in keywords:
+                if kw.lower() in summary:
+                    score += 1
+            
+            if score > 0:
+                results.append((session, score))
+        
+        # 関連度でソート（降順）、同点なら更新日でソート
+        results.sort(key=lambda x: (x[1], x[0].get("updated_at", "")), 
+                     reverse=True)
+        
+        return results[:limit]

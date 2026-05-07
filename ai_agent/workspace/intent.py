@@ -20,6 +20,22 @@ SESSION_SEARCH_KEYWORDS = [
     "chat", "session", "スレッド"
 ]
 
+# 複数セッション結合キーワード
+MULTI_SESSION_KEYWORDS = [
+    "踏まえて", "合わせて", "結合", "マージ",
+    "両方", "二つ", "複数", "cross",
+    "A と B", "1 と 2"
+]
+
+# 検索キーワード抽出パターン
+SEARCH_PATTERNS = [
+    r"(.+?)について話した",
+    r"(.+?)のチャット",
+    r"(.+?)のセッション",
+    r"(.+?)を探して",
+    r"(.+?)を検索",
+]
+
 
 def detect_continuity_intent(query: str) -> bool:
     """継続意図を検出"""
@@ -31,6 +47,27 @@ def detect_session_search_intent(query: str) -> bool:
     """セッション検索意図を検出"""
     q = query.lower()
     return any(k in q for k in SESSION_SEARCH_KEYWORDS)
+
+
+def detect_multi_session_intent(query: str) -> bool:
+    """複数セッション結合意図を検出"""
+    q = query.lower()
+    return any(k in q for k in MULTI_SESSION_KEYWORDS)
+
+
+def extract_search_keywords(query: str) -> list:
+    """検索キーワードを抽出"""
+    import re
+    
+    keywords = []
+    for pattern in SEARCH_PATTERNS:
+        match = re.search(pattern, query)
+        if match:
+            keyword = match.group(1).strip()
+            if keyword:
+                keywords.append(keyword)
+    
+    return keywords
 
 
 def extract_session_keyword(query: str) -> str:
@@ -59,8 +96,9 @@ def analyze_intent(query: str) -> dict:
     
     Returns:
         {
-            "type": "continuity" | "session_search" | "normal",
+            "type": "continuity" | "session_search" | "multi_session" | "normal",
             "keyword": str,
+            "keywords": list,
             "confidence": float
         }
     """
@@ -71,7 +109,17 @@ def analyze_intent(query: str) -> dict:
         return {
             "type": "continuity",
             "keyword": extract_session_keyword(query),
+            "keywords": extract_search_keywords(query),
             "confidence": 0.8
+        }
+    
+    # 複数セッション結合意図
+    if detect_multi_session_intent(q):
+        return {
+            "type": "multi_session",
+            "keyword": extract_session_keyword(query),
+            "keywords": extract_search_keywords(query),
+            "confidence": 0.7
         }
     
     # セッション検索意図
@@ -79,11 +127,13 @@ def analyze_intent(query: str) -> dict:
         return {
             "type": "session_search",
             "keyword": extract_session_keyword(query),
+            "keywords": extract_search_keywords(query),
             "confidence": 0.7
         }
     
     return {
         "type": "normal",
         "keyword": "",
+        "keywords": [],
         "confidence": 0.0
     }

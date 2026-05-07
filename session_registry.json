@@ -29,7 +29,7 @@
         "Phase 4: session continuity"
       ],
       "last_user_intent": "テスト意図",
-      "updated_at": "2026-05-07T11:51:32.129050"
+      "updated_at": "2026-05-07T12:06:38.429027"
     },
     {
       "chat_id": "chat_test_auto_001",
@@ -53,5 +53,5 @@
       ]
     }
   ],
-  "last_updated": "2026-05-07T11:55:30.723873"
+  "last_updated": "2026-05-07T12:06:38.429031"
 }
