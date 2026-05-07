@@ -13,7 +13,9 @@ from ai_agent.workspace.session_registry import SessionRegistry
 from ai_agent.workspace.session_context import build_session_context, inject_session_context, build_multi_session_context, build_combined_context
 from ai_agent.workspace.intent import analyze_intent, detect_continuity_intent, detect_multi_session_intent, extract_search_keywords
 from ai_agent.workspace.session_auto_save import extract_topics, generate_summary, extract_next_actions, auto_save_session, distill_knowledge, auto_merge_sessions
-from ai_agent.workspace.project_master import generate_project_master, load_project_master
+from ai_agent.workspace.project_master import generate_project_master, load_project_master, add_best_practice
+from ai_agent.workspace.reflection import evaluate_task, generate_retry_plan, check_resource_usage
+from ai_agent.workspace.workspace_scanner import scan_workspace, scan_and_compress
 
 
 def test_session_registry():
@@ -294,6 +296,7 @@ def test_project_master():
     print(f"  セッション数: {master['session_count']}")
     print(f"  重要トピック: {master['important_topics'][:5]}")
     print(f"  未完了タスク数: {len(master['unfinished_tasks'])}")
+    print(f"  テックスタック：{master.get('tech_stack', {}).get('python_version', 'N/A')}")
     
     if master['unfinished_tasks']:
         print(f"\n📋 未完了タスクリスト (上位 5 件):")
@@ -303,6 +306,126 @@ def test_project_master():
     # 読み込みテスト
     loaded = load_project_master("queryquest_project")
     print(f"\n✅ 読み込みテスト完了: {loaded['workspace_id']}")
+
+
+def test_reflection():
+    """自己評価テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 自己評価テスト")
+    print("=" * 60)
+    
+    # テスト用のタスクと出力
+    task = "Python でファイルを読み込むコードを書く"
+    output = "```python\nwith open('file.txt', 'r') as f:\n    content = f.read()\nprint(content)\n```"
+    
+    # 自己評価
+    evaluation = evaluate_task(task, output)
+    
+    print(f"\n🪞 自己評価結果:")
+    print(f"  スコア: {evaluation['score']}/10")
+    print(f"  改善点: {evaluation['improvements'][:2]}")
+    print(f"  教訓: {evaluation['lessons'][:2]}")
+    print(f"  再実行必要: {evaluation['retry_needed']}")
+    
+    # 再実行プラン生成
+    if evaluation['score'] < 7:
+        retry_plan = generate_retry_plan(task, evaluation)
+        print(f"\n🔄 再実行プラン:")
+        print(f"  プラン: {retry_plan['plan'][:100]}...")
+        print(f"  優先度: {retry_plan['priority']}")
+    
+    # リソース監視
+    resource_usage = check_resource_usage()
+    print(f"\n📊 リソース使用状況:")
+    print(f"  メモリ：{resource_usage['memory_usage_mb']:.1f}MB")
+    print(f"  重大：{resource_usage['is_critical']}")
+    print(f"  推奨：{resource_usage['recommendation']}")
+
+
+def test_workspace_scanner():
+    """ワークスペーススキャナーテスト"""
+    print("\n" + "=" * 60)
+    print("🧪 ワークスペーススキャナーテスト")
+    print("=" * 60)
+    
+    # スキャン
+    result = scan_workspace()
+    
+    print(f"\n📋 スキャン結果:")
+    print(f"  ドキュメント数：{len(result['documents'])}件")
+    print(f"  ルール数：{len(result['rules'])}件")
+    print(f"  サマリー：{result['summary']}")
+    
+    # テックスタック
+    tech_stack = result.get('tech_stack', {})
+    if tech_stack.get('libraries'):
+        libs = list(tech_stack['libraries'].keys())[:5]
+        print(f"  主要ライブラリ：{', '.join(libs)}")
+    
+    # 圧縮形式
+    compressed = scan_and_compress()
+    print(f"\n📦 圧縮形式:")
+    print(f"  {compressed[:200]}...")
+
+
+def test_self_reflection():
+    """自己評価・反省機能テスト"""
+    print("\n" + "=" * 60)
+    print("🧪 自己評価・反省機能 テスト")
+    print("=" * 60)
+    
+    # テスト用のタスクと出力
+    test_query = "Python でファイル操作を行うコードを書いてください"
+    test_output = """
+import os
+
+# ファイルの読み込み
+with open('test.txt', 'r') as f:
+    content = f.read()
+    print(content)
+
+# ファイルの書き込み
+with open('output.txt', 'w') as f:
+    f.write('Hello, World!')
+"""
+    
+    # 自己評価
+    print("\n🪞 自己評価実行:")
+    evaluation = evaluate_task_output(
+        task_description=test_query,
+        output=test_output,
+        success_criteria="ファイル操作が正しく行えること"
+    )
+    
+    print(f"  スコア: {evaluation['score']}/10")
+    print(f"  改善点: {evaluation['improvements'][:2]}")
+    print(f"  教訓: {evaluation['lessons'][:2]}")
+    print(f"  再実行必要: {evaluation['needs_retry']}")
+    
+    # 改善プラン生成
+    print("\n🔄 改善プラン生成:")
+    improvement_plan = generate_improvement_plan(
+        task_description=test_query,
+        evaluation=evaluation,
+        previous_attempts=[]
+    )
+    
+    print(f"  プラン: {improvement_plan['plan'][:100]}...")
+    print(f"  優先度: {improvement_plan['priority']}")
+    print(f"  見積もり: {improvement_plan['estimated_effort']}")
+    
+    # リソース監視
+    print("\n📊 リソース監視:")
+    resource_usage = check_resource_usage()
+    print(f"  メモリ使用率: {resource_usage['memory_percent']:.1f}%")
+    print(f"  RSS: {resource_usage['memory_rss_mb']:.1f} MB")
+    print(f"  危険度: {'⚠️ 危険' if resource_usage['is_critical'] else '✅ 正常'}")
+    
+    # ベストプラクティス追加
+    print("\n📚 ベストプラクティス追加:")
+    if evaluation['lessons']:
+        add_best_practice("queryquest_project", evaluation['lessons'][0], "reflection")
+        print(f"  ✅ 教訓を追加: {evaluation['lessons'][0][:50]}...")
 
 
 def main():
@@ -320,6 +443,8 @@ def main():
         test_intent_detection_advanced()
         test_session_merge()
         test_project_master()
+        test_reflection()
+        test_workspace_scanner()
         
         print("\n" + "=" * 60)
         print("✅ 全テスト完了")

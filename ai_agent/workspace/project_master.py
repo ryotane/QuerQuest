@@ -56,6 +56,8 @@ def generate_project_master(workspace_id: str = "queryquest_project") -> dict:
         "important_topics": all_topics[:20],
         "active_goals": active_goals,
         "unfinished_tasks": all_actions[:50],  # 最大 50 件
+        "best_practices": _load_best_practices(),  # 教訓・ベストプラクティス
+        "tech_stack": _extract_tech_stack(),  # テックスタック
         "session_count": len(project_sessions),
         "last_updated": datetime.now().isoformat()
     }
@@ -130,3 +132,116 @@ def load_project_master(workspace_id: str = "queryquest_project") -> dict:
     
     # なければ新規生成
     return generate_project_master(workspace_id)
+
+
+def _load_best_practices() -> list:
+    """
+    ベストプラクティスファイルを読み込み
+    
+    Returns:
+        ベストプラクティスのリスト
+    """
+    best_practices_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "best_practices.json"
+    )
+    
+    if os.path.exists(best_practices_path):
+        with open(best_practices_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("best_practices", [])
+    
+    return []
+
+
+def add_best_practice(workspace_id: str = "queryquest_project", lesson: str = "", category: str = "general") -> dict:
+    """
+    ベストプラクティスを追加
+    
+    Args:
+        workspace_id: ワークスペース ID
+        lesson: 教訓
+        category: カテゴリ
+    
+    Returns:
+        更新されたベストプラクティス
+    """
+    best_practices_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "best_practices.json"
+    )
+    
+    # 既存データを読み込み
+    if os.path.exists(best_practices_path):
+        with open(best_practices_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {"best_practices": []}
+    
+    # 重複チェック
+    existing = data.get("best_practices", [])
+    for item in existing:
+        if item.get("lesson") == lesson:
+            return data  # 重複時はそのまま返す
+    
+    # 新規追加
+    new_practice = {
+        "id": f"bp_{len(existing) + 1:03d}",
+        "lesson": lesson,
+        "category": category,
+        "workspace_id": workspace_id,
+        "added_at": datetime.now().isoformat()
+    }
+    
+    existing.append(new_practice)
+    data["best_practices"] = existing
+    
+    # 保存
+    with open(best_practices_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    
+    return data
+
+
+def _extract_tech_stack() -> dict:
+    """
+    テックスタックを抽出
+    
+    Returns:
+        テックスタック辞書
+    """
+    import re
+    
+    tech_stack = {
+        "python_version": "3.12",
+        "libraries": {},
+        "tools": [],
+        "frameworks": []
+    }
+    
+    # requirements.txt を探す
+    requirements_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "requirements.txt"
+    )
+    
+    if os.path.exists(requirements_path):
+        try:
+            with open(requirements_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        # パッケージ名とバージョンを抽出
+                        match = re.match(r'^([a-zA-Z0-9_-]+)==(.+)
+, line)
+                        if match:
+                            tech_stack["libraries"][match.group(1)] = match.group(2)
+                        else:
+                            # バージョンなしの場合
+                            match = re.match(r'^([a-zA-Z0-9_-]+)', line)
+                            if match:
+                                tech_stack["libraries"][match.group(1)] = "latest"
+        except Exception as e:
+            print(f"⚠️ requirements.txt 読み込みエラー: {e}")
+    
+    return tech_stack
