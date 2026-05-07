@@ -1,6 +1,7 @@
 import requests
 import time
 import re
+from datetime import datetime
 
 from ai_agent.llm.lmstudio import LMStudioClient
 from ai_agent.memory.memory import MemorySystem
@@ -520,6 +521,27 @@ class Orchestrator:
             query,
             final
         )
+
+        # =====================================
+        # 📦 Session Auto-Save
+        # =====================================
+        try:
+            from ai_agent.workspace.session_auto_save import auto_save_session
+            import uuid
+            
+            # chat_id の生成（MVP: 新規生成）
+            chat_id = f"chat_{uuid.uuid4().hex[:8]}"
+            title = f"Chat_{datetime.now().strftime('%Y%m%d_%H%M')}"
+            
+            # セッション自動保存
+            auto_save_session(
+                chat_id=chat_id,
+                title=title,
+                query=query,
+                answer=final
+            )
+        except Exception as e:
+            print(f"⚠️ Session auto-save failed: {e}")
 
         # =====================================
         # 🚀 Return

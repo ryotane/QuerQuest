@@ -29,8 +29,29 @@
         "Phase 4: session continuity"
       ],
       "last_user_intent": "テスト意図",
-      "updated_at": "2026-05-07T11:28:15.822995"
+      "updated_at": "2026-05-07T11:51:32.129050"
+    },
+    {
+      "chat_id": "chat_test_auto_001",
+      "title": "テストセッション自動保存",
+      "workspace_id": "queryquest_project",
+      "summary": "Session Continuity MVPの実装を開始。`session_registry.json`の作成と、load/save/update/直近取得/タイトル検索を備えた`SessionRegistry`クラスを実装し、チャット間での状態継続基盤を構築します。",
+      "recent_topics": [
+        "MVP",
+        "Session",
+        "Continuity",
+        "Registry",
+        "実装"
+      ],
+      "active_goals": [],
+      "last_user_intent": "Session Continuity MVP を実装したい。session_registry.json を作成して、SessionRegistry クラスを実装する。",
+      "updated_at": "2026-05-07T11:55:30.723847",
+      "next_actions": [
+        "`session_registry.json` の初期ファイル作成とスキーマ定義",
+        "`SessionRegistry` クラスの core 機能（load/save/update）の実装",
+        "検索機能（get_recent_sessions/find_session_by_title）の実装と基本的な検証"
+      ]
     }
   ],
-  "last_updated": "2026-05-07T11:28:15.823000"
+  "last_updated": "2026-05-07T11:55:30.723873"
 }
