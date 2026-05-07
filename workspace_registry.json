@@ -39,6 +39,12 @@
       "description": "Phase 5: LMStudioClient 修正",
       "status": "pending",
       "created_at": "2026-05-06T21:00:00Z"
+    },
+    {
+      "id": "goal_006",
+      "description": "Phase 6: セッション検索とマルチセッションコンテキスト統合",
+      "status": "completed",
+      "completed_at": "2026-05-07T12:30:00Z"
     }
   ],
   "recent_decisions": [
