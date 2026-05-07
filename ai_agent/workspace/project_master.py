@@ -9,6 +9,7 @@
 
 import json
 import os
+import re
 from datetime import datetime
 from ai_agent.workspace.session_registry import SessionRegistry
 
@@ -210,8 +211,6 @@ def _extract_tech_stack() -> dict:
     Returns:
         テックスタック辞書
     """
-    import re
-    
     tech_stack = {
         "python_version": "3.12",
         "libraries": {},
@@ -232,8 +231,7 @@ def _extract_tech_stack() -> dict:
                     line = line.strip()
                     if line and not line.startswith('#'):
                         # パッケージ名とバージョンを抽出
-                        match = re.match(r'^([a-zA-Z0-9_-]+)==(.+)
-, line)
+                        match = re.match(r'^([a-zA-Z0-9_-]+)==(.+)$', line)
                         if match:
                             tech_stack["libraries"][match.group(1)] = match.group(2)
                         else:
