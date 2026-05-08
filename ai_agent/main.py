@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from ai_agent.hermes.orchestrator import Orchestrator
 from ai_agent.llm.lmstudio import LMStudioClient
 from ai_agent.rag.pdf_rag import PDFRag
+from ai_agent.runtime_safety.safety_guard import CollapsePreventionLayer
 import time
 import uuid
 import json
@@ -14,6 +15,15 @@ app = FastAPI()
 orch = Orchestrator()
 llm = LMStudioClient()
 pdf_rag = PDFRag()
+
+# Project_08: Runtime Collapse Prevention (startup bootstrap)
+collapse_prevention = CollapsePreventionLayer(
+    planning_ttl_seconds=5.0,
+    planning_ttl_steps=10,
+    max_plan_length=1,
+    anti_meta_threshold=2,
+    debug=False,
+)
 
 IGNORE_PREFIXES = [
     "### Task:",

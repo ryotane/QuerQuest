@@ -55,6 +55,10 @@ class SessionRegistry:
             key=lambda x: x.get("updated_at", ""),
             reverse=True
         )
+        # Project_08: next-action-only強制
+        for session in sorted_sessions:
+            if session.get("next_actions"):
+                session["next_actions"] = [session["next_actions"][0]]
         return sorted_sessions[:limit]
     
     def update_session(self, chat_id: str, title: str, summary: str, 

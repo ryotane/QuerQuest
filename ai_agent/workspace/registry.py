@@ -45,6 +45,9 @@ class WorkspaceRegistry:
     def get_context(self) -> str:
         """ワークスペースコンテキストを生成"""
         from ai_agent.workspace.context import generate_workspace_context
+        # Project_08: workspace hydration時にplan compression適用
+        if self.registry.get("active_goals"):
+            self.registry["active_goals"] = self.registry["active_goals"][:1]
         return generate_workspace_context(self.registry)
     
     def update_summary(self, summary: str):
