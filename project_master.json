@@ -1,0 +1,25 @@
+{
+  "workspace_id": "queryquest_project",
+  "generated_at": "2025-07-07T00:00:00",
+  "project_summary": "lightweight AI Runtime - Mac-friendly stability focus",
+  "important_topics": [
+    "runtime hardening",
+    "memory pressure protection",
+    "swap prevention",
+    "lightweight mode",
+    "graceful degradation"
+  ],
+  "active_goals": [
+    "Project_09: Runtime Hardening - stability fixation"
+  ],
+  "unfinished_tasks": [],
+  "best_practices": [],
+  "tech_stack": {
+    "python_version": "3.12",
+    "libraries": {},
+    "tools": [],
+    "frameworks": []
+  },
+  "session_count": 0,
+  "last_updated": "2025-07-07T00:00:00"
+}
