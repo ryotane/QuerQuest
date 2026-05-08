@@ -1,108 +1,90 @@
 """
-Runtime Profile - Lightweight Mode Definition
+runtime_profile.py - Runtime Profile 定義
 
 Project_09: Runtime Hardening
-- lightweight/balanced/full モード定義
-- Mac-friendly minimal mode (default)
+「安定性の固定化」
+
+lightweight / balanced / full の3モードを定義。
+デフォルトは lightweight。
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
-from enum import Enum
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 
-class RuntimeProfile(Enum):
-    """Runtime profile types"""
-    LIGHTWEIGHT = "lightweight"
-    BALANCED = "balanced"
-    FULL = "full"
-
-
-@dataclass
+@dataclass(frozen=True)
 class ProfileConfig:
-    """Profile-specific configuration"""
-    profile: RuntimeProfile
-    embedding_enabled: bool = False
-    vector_search_enabled: bool = False
-    compression_enabled: bool = True
-    telemetry_enabled: bool = False
-    background_tasks: bool = False
-    max_reflection_depth: int = 1
-    max_reasoning_steps: int = 5
-    max_plan_length: int = 3
-    memory_cap_mb: int = 512
-    token_budget: int = 50_000
-    health_check_interval: int = 60
-    debug: bool = False
+    """単一プロファイルの設定"""
+    max_tokens: int
+    temperature: float
+    max_plan_steps: int
+    plan_timeout: int
+    max_reflections: int
+    reflection_timeout: int
+    max_memory_mb: int
+    max_memory_entries: int
+    max_context_tokens: int
+    swap_threshold_mb: int
+    description: str
 
 
-# Profile definitions
-PROFILE_CONFIGS: Dict[RuntimeProfile, ProfileConfig] = {
-    RuntimeProfile.LIGHTWEIGHT: ProfileConfig(
-        profile=RuntimeProfile.LIGHTWEIGHT,
-        embedding_enabled=False,
-        vector_search_enabled=False,
-        compression_enabled=True,
-        telemetry_enabled=False,
-        background_tasks=False,
-        max_reflection_depth=1,
-        max_reasoning_steps=5,
-        max_plan_length=3,
-        memory_cap_mb=512,
-        token_budget=50_000,
-        health_check_interval=60,
-        debug=False,
+# プロファイル定義
+PROFILES: Dict[str, ProfileConfig] = {
+    "lightweight": ProfileConfig(
+        max_tokens=1024,
+        temperature=0.3,
+        max_plan_steps=3,
+        plan_timeout=30,
+        max_reflections=1,
+        reflection_timeout=15,
+        max_memory_mb=512,
+        max_memory_entries=256,
+        max_context_tokens=50_000,
+        swap_threshold_mb=100,
+        description="Mac-friendly. Low CPU, low memory, low swap.",
     ),
-    RuntimeProfile.BALANCED: ProfileConfig(
-        profile=RuntimeProfile.BALANCED,
-        embedding_enabled=True,
-        vector_search_enabled=True,
-        compression_enabled=True,
-        telemetry_enabled=True,
-        background_tasks=False,
-        max_reflection_depth=2,
-        max_reasoning_steps=8,
-        max_plan_length=5,
-        memory_cap_mb=1024,
-        token_budget=100_000,
-        health_check_interval=30,
-        debug=False,
+    "balanced": ProfileConfig(
+        max_tokens=2048,
+        temperature=0.5,
+        max_plan_steps=5,
+        plan_timeout=60,
+        max_reflections=2,
+        reflection_timeout=30,
+        max_memory_mb=1024,
+        max_memory_entries=512,
+        max_context_tokens=100_000,
+        swap_threshold_mb=500,
+        description="Balanced performance and resource usage.",
     ),
-    RuntimeProfile.FULL: ProfileConfig(
-        profile=RuntimeProfile.FULL,
-        embedding_enabled=True,
-        vector_search_enabled=True,
-        compression_enabled=False,
-        telemetry_enabled=True,
-        background_tasks=True,
-        max_reflection_depth=5,
-        max_reasoning_steps=15,
-        max_plan_length=10,
-        memory_cap_mb=2048,
-        token_budget=200_000,
-        health_check_interval=15,
-        debug=True,
+    "full": ProfileConfig(
+        max_tokens=4096,
+        temperature=0.7,
+        max_plan_steps=10,
+        plan_timeout=120,
+        max_reflections=3,
+        reflection_timeout=60,
+        max_memory_mb=2048,
+        max_memory_entries=1024,
+        max_context_tokens=200_000,
+        swap_threshold_mb=1000,
+        description="Maximum capability. Higher resource usage.",
     ),
 }
 
-
-def get_profile(profile_name: str) -> ProfileConfig:
-    """Get profile by name"""
-    try:
-        profile = RuntimeProfile(profile_name)
-        return PROFILE_CONFIGS[profile]
-    except ValueError:
-        # Default to lightweight
-        return PROFILE_CONFIGS[RuntimeProfile.LIGHTWEIGHT]
+# デフォルトプロファイル
+DEFAULT_PROFILE = "lightweight"
 
 
-def get_default_profile() -> ProfileConfig:
-    """Get default (lightweight) profile"""
-    return PROFILE_CONFIGS[RuntimeProfile.LIGHTWEIGHT]
+def get_profile(name: str) -> ProfileConfig:
+    """プロファイルを取得"""
+    return PROFILES.get(name, PROFILES[DEFAULT_PROFILE])
 
 
-def is_lightweight(profile: Optional[ProfileConfig] = None) -> bool:
-    """Check if profile is lightweight"""
-    if profile is None:
-        return True
-    return profile.profile == RuntimeProfile.LIGHTWEIGHT
+def list_profiles() -> Dict[str, str]:
+    """利用可能なプロファイル一覧"""
+    return {k: v.description for k, v in PROFILES.items()}
+
+
+def validate_profile(name: str) -> bool:
+    """プロファイル名が有効か検証"""
+    return name in PROFILES
