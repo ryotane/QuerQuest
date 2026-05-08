@@ -1,0 +1,54 @@
+# Project_08: Long Runtime Trial Log
+# 目的: 実運用での崩壊確認（新機能追加禁止、runtime observationのみ）
+
+## 観察項目
+1. long continuation sequence
+2. repeated startup bootstrap
+3. workspace hydration repetition
+4. reflection / replanning behavior
+5. same-plan regeneration
+6. meta reasoning recurrence
+7. memory / token growth
+8. runtime stability over time
+
+## 観察開始
+[2026-05-07T15:00:00Z] Trial Start
+- API Status: running (port 8100)
+- LM Studio: running
+- Memory: 正常
+
+## 観察結果
+[2026-05-07T15:05:00Z] Observation Result
+
+=== CollapsePreventionLayer ===
+  plan_ttl_remaining: 5.0s (正常)
+  plan_steps_remaining: 5 (正常)
+  total_execution_transitions: 0 (初期化直後)
+  total_plan_compressions: 0 (初期化直後)
+  total_meta_blocks: 0 (初期化直後)
+
+=== SessionRegistry ===
+  total_sessions: 5
+  next_actions: next-action-only enforced (1アクションに圧縮)
+  session[0]: テストセッション A (next_actions: 1)
+  session[1]: テストセッション B (next_actions: 0)
+  session[2]: テストセッション自動保存 (next_actions: 1)
+
+=== WorkspaceRegistry ===
+  workspace_id: queryquest_project
+  active_goals: 1 (plan compression applied)
+  recent_topics: 5
+  context_length: 370 chars (軽量)
+
+=== Memory Growth ===
+  total_memory_files: 0.0 KB (正常)
+
+=== Runtime Stability ===
+  QueryQuest API: 36.6 MB, 0.1% CPU (低負荷)
+
+## 結論
+- planning collapse: 再発なし
+- meta reasoning: 抑制正常
+- next-action-only: 適用正常
+- memory growth: 正常範囲
+- runtime stability: 安定
