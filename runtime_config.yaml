@@ -104,3 +104,60 @@ validation:
     min_plan_length: 1
     max_memory_bytes: 100_000_000
     min_memory_bytes: 1_000_000
+
+# ========================================
+# Ambient Runtime (Project_16)
+# ========================================
+ambient_runtime:
+  # Presence Layer Settings
+  presence_layer:
+    idle_notification_level: none          # none / low / high
+    passive_notification_level: none       # none / low / high
+    active_assistance_notification_level: low
+    critical_issue_notification_level: high
+    recovery_notification_level: none
+    layer_transition_fade_ms: 300           # フェードイン/アウト時間
+
+  # iPhone Companion Settings
+  iphone_companion:
+    notification_cooldown_seconds: 3600     # 1時間（緊急時以外）
+    max_daily_notifications: 5              # 1日あたりの通知上限
+    batched_delivery_enabled: true          # バッチ配信有効
+    realtime_sync_enabled: false            # リアルタイム同期無効
+    connection_grace_period_seconds: 30     # 切断許容時間
+
+  # Dashboard Settings
+  dashboard:
+    low_density_mode: true                  # 低密度情報表示
+    minimal_graphs: true                    # グラフ最小限
+    calm_observability: true                # 静かな可観測性
+    reassurance_first: true                 # 安心感優先
+    max_visible_metrics: 3                  # 最大表示メトリクス数
+    detail_access_on_demand: true           # 詳細は必要時のみ
+
+  # Memory Environment Settings
+  memory_environment:
+    background_infrastructure: true         # バックグラウンドインフラ
+    surfaced_only_when_needed: true         # 必要時のみ表示
+    quiet_archive: true                     # 静かなアーカイブ
+    no_forced_recall: true                  # 強制想起禁止
+    no_memory_flooding: true                # メモリ洪水禁止
+    max_concurrent_surfaces: 2              # 同時表示最大数
+
+  # Attention Protection Settings
+  attention_protection:
+    focus_mode_detection: true              # 集中状態検出
+    repeated_interruption_suppression: true # 繰り返し中断抑制
+    passive_waiting_behavior: true          # 受動的待機動作
+    notification_cooldown_seconds: 1800     # 通知冷却時間（30分）
+    silent_recovery_enabled: true           # サイレントリカバリ有効
+    max_proposals_per_issue: 1              # 問題あたりの提案数上限
+    proposal_cooldown_minutes: 60           # 提案冷却時間
+
+  # Ambient Continuity Settings
+  ambient_continuity:
+    invisible_hydration: true               # 目に見えない状態復元
+    no_forced_continuation: true            # 強制継続禁止
+    calm_restoration: true                  # 静かな回復処理
+    natural_resume_enabled: true            # 自然な再開有効
+    interruption_acceptance: true           # 中断の許容
