@@ -5,6 +5,7 @@ from datetime import datetime
 
 from ai_agent.llm.lmstudio import LMStudioClient
 from ai_agent.memory.memory import MemorySystem
+from ai_agent.runtime_safety.safety_guard import CollapsePreventionLayer
 
 
 # =========================================
@@ -455,12 +456,24 @@ def cleanup_answer(text):
 # =========================================
 class Orchestrator:
 
+    def __init__(self):
+        # Project_08: Collapse Prevention Layer
+        self.collapse_prevention = CollapsePreventionLayer(
+            planning_ttl_seconds=5.0,
+            planning_ttl_steps=10,
+            max_plan_length=1,
+            anti_meta_threshold=2,
+            debug=False,
+        )
+
     def run(
         self,
         query,
         history=None
     ):
-
+        # Project_08: 計画リセット（各リクエストで初期化）
+        self.collapse_prevention.reset_plan()
+        
         print(f"\n🧠 {query}")
 
         # =====================================
@@ -624,77 +637,90 @@ class Orchestrator:
             print(f"⚠️ Session auto-save failed: {e}")
 
         # =====================================
-        # 🪞 Self-Reflection (Phase 8)
+        # 🪞 Self-Reflection (Phase 8) - Project_08 Modified
         # =====================================
         try:
             from ai_agent.workspace.reflection import evaluate_task, generate_retry_plan, check_resource_usage
             from ai_agent.workspace.project_master import add_best_practice
             
-            # 自己評価
-            evaluation = evaluate_task(
-                task=query,
-                output=final,
-                context=context
-            )
-            
-            print(f"\n🪞 自己評価結果:")
-            print(f"  スコア: {evaluation['score']}/10")
-            print(f"  改善点: {evaluation['improvements'][:2]}")
-            print(f"  教訓: {evaluation['lessons'][:2]}")
-            print(f"  再実行必要: {evaluation['retry_needed']}")
-            
-            # 教訓をベストプラクティスに蓄積
-            for lesson in evaluation['lessons']:
-                add_best_practice("queryquest_project", lesson, "reflection")
-            
-            # スコアが低い場合は再プランニング
-            if evaluation['score'] < 7:
-                retry_plan = generate_retry_plan(
+            # Project_08: planning TTLチェック
+            is_valid, reason = self.collapse_prevention.check_planning_ttl()
+            if not is_valid:
+                print(f"\n⏰ PLANNING TTL EXPIRED: {reason}")
+                print(f"   → execution-first: 即座に実行へ遷移")
+                # 再プランニングをスキップ
+            else:
+                # 自己評価
+                evaluation = evaluate_task(
                     task=query,
-                    evaluation=evaluation
+                    output=final,
+                    context=context
                 )
                 
-                print(f"\n🔄 再実行プラン:")
-                print(f"  プラン: {retry_plan['plan'][:100]}...")
-                print(f"  優先度: {retry_plan['priority']}")
+                print(f"\n🪞 自己評価結果:")
+                print(f"  スコア: {evaluation['score']}/10")
+                print(f"  改善点: {evaluation['improvements'][:2]}")
+                print(f"  教訓: {evaluation['lessons'][:2]}")
+                print(f"  再実行必要: {evaluation['retry_needed']}")
                 
-                # next_actions に最優先で追加
-                from ai_agent.workspace.session_registry import SessionRegistry
-                registry = SessionRegistry()
+                # 教訓をベストプラクティスに蓄積
+                for lesson in evaluation['lessons']:
+                    add_best_practice("queryquest_project", lesson, "reflection")
                 
-                # 最新のセッションを取得
-                recent = registry.get_recent_sessions(limit=1)
-                if recent:
-                    session = recent[0]
-                    next_actions = session.get('next_actions', [])
-                    next_actions.insert(0, f"[反省] {retry_plan['plan'][:100]}")
-                    
-                    # セッションを更新
-                    registry.update_session(
-                        chat_id=session['chat_id'],
-                        title=session['title'],
-                        summary=session.get('summary', ''),
-                        recent_topics=session.get('recent_topics', []),
-                        active_goals=session.get('active_goals', []),
-                        last_user_intent=session.get('last_user_intent', '')
+                # スコアが低い場合は再プランニング
+                if evaluation['score'] < 7:
+                    # Project_08: next-action-only強制
+                    retry_plan = generate_retry_plan(
+                        task=query,
+                        evaluation=evaluation
                     )
                     
-                    # next_actions を直接追加
-                    import json
-                    with open(registry.path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    for s in data["sessions"]:
-                        if s["chat_id"] == session['chat_id']:
-                            s["next_actions"] = next_actions
-                    with open(registry.path, "w", encoding="utf-8") as f:
-                        json.dump(data, f, indent=2, ensure_ascii=False)
+                    # Project_08: 計画圧縮（1アクションのみ）
+                    compressed_plan = self.collapse_prevention.enforce_next_action_only(
+                        [retry_plan['plan']]
+                    )
                     
-                    print(f"  ✅ 再実行プランを next_actions に追加")
-            
-            # リソース監視
-            resource_usage = check_resource_usage()
-            if resource_usage['is_critical']:
-                print(f"\n⚠️ リソース警告: メモリ {resource_usage['memory_usage_mb']:.1f}MB")
+                    print(f"\n🔄 再実行プラン:")
+                    print(f"  プラン: {compressed_plan[0][:100]}...")
+                    print(f"  優先度: {retry_plan['priority']}")
+                    
+                    # next_actions に最優先で追加
+                    from ai_agent.workspace.session_registry import SessionRegistry
+                    registry = SessionRegistry()
+                    
+                    # 最新のセッションを取得
+                    recent = registry.get_recent_sessions(limit=1)
+                    if recent:
+                        session = recent[0]
+                        next_actions = session.get('next_actions', [])
+                        next_actions.insert(0, f"[反省] {compressed_plan[0][:100]}")
+                        
+                        # セッションを更新
+                        registry.update_session(
+                            chat_id=session['chat_id'],
+                            title=session['title'],
+                            summary=session.get('summary', ''),
+                            recent_topics=session.get('recent_topics', []),
+                            active_goals=session.get('active_goals', []),
+                            last_user_intent=session.get('last_user_intent', '')
+                        )
+                        
+                        # next_actions を直接追加
+                        import json
+                        with open(registry.path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        for s in data["sessions"]:
+                            if s["chat_id"] == session['chat_id']:
+                                s["next_actions"] = next_actions
+                        with open(registry.path, "w", encoding="utf-8") as f:
+                            json.dump(data, f, indent=2, ensure_ascii=False)
+                        
+                        print(f"  ✅ 再実行プランを next_actions に追加")
+                
+                # リソース監視
+                resource_usage = check_resource_usage()
+                if resource_usage['is_critical']:
+                    print(f"\n⚠️ リソース警告: メモリ {resource_usage['memory_usage_mb']:.1f}MB")
         except Exception as e:
             print(f"⚠️ Self-Reflection failed: {e}")
 
