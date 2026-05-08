@@ -1,0 +1,106 @@
+# QueryQuest Runtime Configuration
+# Project_09: Runtime Hardening - Safe Defaults
+
+# ========================================
+# Runtime Profile
+# ========================================
+# lightweight: Mac-friendly minimal mode (default)
+# balanced: Standard operation
+# full: Maximum features (not recommended for daily use)
+runtime_profile: lightweight
+
+# ========================================
+# Safety Guard Defaults (P0: safe defaults)
+# ========================================
+safety_guard:
+  max_reasoning_steps: 5          # 10 → 5 (厳格化)
+  max_hypothesis_repeats: 2       # 3 → 2 (厳格化)
+  max_same_file_reads: 2          # 3 → 2 (厳格化)
+  observation_cooldown_ms: 500
+  debug: false
+
+# ========================================
+# Collapse Prevention (Project_08)
+# ========================================
+collapse_prevention:
+  planning_ttl_seconds: 5.0
+  planning_ttl_steps: 10
+  max_plan_length: 3
+  anti_meta_threshold: 2
+  debug: false
+
+# ========================================
+# Memory Management (P1: resource caps)
+# ========================================
+memory:
+  max_items: 500                  # 1000 → 500 (削減)
+  max_active_memory_bytes: 5_000_000      # 5MB
+  max_archive_memory_bytes: 20_000_000    # 20MB
+  max_total_memory_bytes: 30_000_000      # 30MB
+  compression_trigger_ratio: 0.7    # 70% で圧縮開始
+  swap_prevention: true
+  swap_threshold_mb: 100            # 100MB で警告
+
+# ========================================
+# Token Budget (P2: token growth control)
+# ========================================
+token_budget:
+  max_context_tokens: 50_000        # 50k tokens
+  growth_alert_threshold: 10.0      # 10% で警告
+  explosion_threshold: 50.0         # 50% で緊急停止
+  compression_priority: high        # high/medium/low
+
+# ========================================
+# Loop Risk (P1: loop prevention)
+# ========================================
+loop_risk:
+  high_threshold: 0.5
+  critical_threshold: 0.8
+  max_injection_count: 5
+  max_recursion_depth: 3
+  max_amplification_count: 2
+
+# ========================================
+# Observability (P1: health monitoring)
+# ========================================
+observability:
+  health_check_interval_seconds: 60
+  export_json: true
+  export_path: "logs/health_status.json"
+  swiftbar: false
+  alert_on_critical: true
+
+# ========================================
+# Graceful Degradation (P1: fail-safe)
+# ========================================
+degradation:
+  on_memory_pressure: compress_archive      # compress_archive / disable_vector / shutdown
+  on_loop_risk_critical: force_observation  # force_observation / disable_planning / shutdown
+  on_token_explosion: compress_context       # compress_context / truncate / shutdown
+  on_config_error: use_defaults             # use_defaults / shutdown
+
+# ========================================
+# Lightweight Mode Overrides (P1: Mac-friendly)
+# ========================================
+lightweight_overrides:
+  embedding_enabled: false
+  vector_search_enabled: false
+  compression_enabled: true
+  telemetry_enabled: false
+  background_tasks: false
+  max_reflection_depth: 1
+
+# ========================================
+# Stability (P0: config validation)
+# ========================================
+validation:
+  require_safe_defaults: true
+  reject_negative_values: true
+  reject_extreme_values: true
+  extreme_value_limits:
+    max_reasoning_steps: 20
+    min_reasoning_steps: 1
+    max_plan_length: 10
+    min_plan_length: 1
+    max_memory_bytes: 100_000_000
+    min_memory_bytes: 1_000_000
