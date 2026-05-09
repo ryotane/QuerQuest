@@ -161,3 +161,35 @@ ambient_runtime:
     calm_restoration: true                  # 静かな回復処理
     natural_resume_enabled: true            # 自然な再開有効
     interruption_acceptance: true           # 中断の許容
+
+# ========================================
+# Runtime State Clarity (Project_027)
+# ========================================
+runtime_state:
+  # Minimal state taxonomy (5 states only)
+  states:
+    - RUNNING      # 実行中
+    - WAITING      # 待機中（外部入力待ち）
+    - COMPLETE     # 正常完了
+    - INTERRUPTED  # ユーザー中断
+    - TIMEOUT      # タイムアウト
+
+  # Timeout boundaries (quiet interruption, not failure)
+  timeout:
+    thinking_ms: 30000      # 思考タイムアウト（30秒）
+    action_ms: 60000        # アクションタイムアウト（1分）
+    waiting_ms: 120000      # 待機タイムアウト（2分）
+
+  # Quiet completion format (on-demand, single-line)
+  completion:
+    on_demand_only: true          # ユーザー確認時のみ表示
+    single_line_format: true      # 1行フォーマットのみ許可
+    no_auto_refresh: true         # 自動更新禁止
+    ephemeral_output: true        # 出力後直ちに消去
+
+  # Interruption recovery clarity
+  interruption:
+    continuation_possible: true   # 再開可能であることを明示
+    next_step_display: true       # 次のステップを提示
+    no_auto_retry: true           # 自動リトライ禁止
+    state_preservation: true      # 中断前状態の維持
