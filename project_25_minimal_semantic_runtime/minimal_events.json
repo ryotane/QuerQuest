@@ -1,0 +1,42 @@
+{
+  "events": [
+    {
+      "type": "reasoning",
+      "timestamp": "",
+      "depth": 0,
+      "compressed": true
+    },
+    {
+      "type": "continuation",
+      "timestamp": "",
+      "flow_id": "",
+      "compressed": true
+    },
+    {
+      "type": "tool_call",
+      "timestamp": "",
+      "tool_name": "",
+      "result_size": 0,
+      "compressed": true
+    },
+    {
+      "type": "compression",
+      "timestamp": "",
+      "ratio": 0.0,
+      "source": ""
+    },
+    {
+      "type": "interruption",
+      "timestamp": "",
+      "reason": "",
+      "recovered": false
+    },
+    {
+      "type": "restart",
+      "timestamp": "",
+      "mode": ""
+    }
+  ],
+  "max_retention": 10,
+  "compression_policy": "always"
+}
