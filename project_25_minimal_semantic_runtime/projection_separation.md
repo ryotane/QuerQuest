@@ -6,10 +6,14 @@
 
 ## Core Principle
 
-**HTMLはviewであり、state sourceではない。**
+**HTMLはprojection viewであり、state sourceではない。**
 
 Runtimeは極小のsemantic stateのみを保持する。
 Projection Layerが、そのstateを必要に応じてHTML/Markdown/SVGへ変換する。
+
+これはPHILOSOPHY.mdの「Projection Separation」セクションに準拠する：
+- Runtime と UI は分離される
+- HTMLはprojection viewである
 
 ---
 

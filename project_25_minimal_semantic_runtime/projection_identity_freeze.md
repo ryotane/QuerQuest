@@ -10,6 +10,13 @@
 
 このidentityはProject_25でも変更しない。
 
+PHILOSOPHY.mdの定義：
+- lightweight continuity
+- minimal memory
+- calm runtime
+- projection-compatible state
+- quiet infrastructure
+
 ---
 
 ## Identity Verification

@@ -20,6 +20,9 @@
 - relation の自己生成
 - ontology の肥大化
 - knowledge graph の構築
+- recursive optimization（PHILOSOPHY.md「No Recursive Expansion」準拠）
+- autonomous self-improvement（PHILOSOPHY.md「No Recursive Expansion」準拠）
+- branch explosion（PHILOSOPHY.md「No Recursive Expansion」準拠）
 
 ### 許可事項
 - minimal state の保持（5フィールドのみ）
