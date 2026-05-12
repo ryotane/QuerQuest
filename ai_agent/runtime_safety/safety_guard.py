@@ -17,6 +17,12 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Set
 from enum import Enum
 
+# Project_039: LoopFailureLogger連携
+try:
+    from ai_agent.self_improve.loop_logger import LoopFailureLogger
+except ImportError:
+    LoopFailureLogger = None
+
 
 class SafetyAction(Enum):
     """安全アクション"""
@@ -78,6 +84,7 @@ class SafetyGuard:
         max_same_file_reads: int = 3,
         observation_cooldown_ms: float = 500,
         debug: bool = False,
+        loop_failure_logger: Optional["LoopFailureLogger"] = None,
     ):
         """
         Args:
@@ -86,12 +93,14 @@ class SafetyGuard:
             max_same_file_reads: 同一ファイルの最大読取数
             observation_cooldown_ms: 観測間の最小間隔 (ms)
             debug: デバッグ出力有効化
+            loop_failure_logger: ループ失敗ログ記録クラス（Project_039）
         """
         self.max_reasoning_steps = max_reasoning_steps
         self.max_hypothesis_repeats = max_hypothesis_repeats
         self.max_same_file_reads = max_same_file_reads
         self.observation_cooldown_ms = observation_cooldown_ms
         self.debug = debug
+        self.loop_failure_logger = loop_failure_logger
         
         # 状態
         self.reasoning_steps: List[Dict] = []
@@ -244,6 +253,19 @@ class SafetyGuard:
             if self._similarity(content, recent[0]) > 0.8 and \
                self._similarity(content, recent[1]) > 0.8:
                 self.total_blocks += 1
+                
+                # Project_039: ループ失敗を記録
+                if self.loop_failure_logger:
+                    try:
+                        self.loop_failure_logger.log_loop_failure(
+                            query="(SafetyGuard検知)",
+                            loop_type="infinite_loop",
+                            reasoning_history=list(self.reasoning_history),
+                            detected_pattern="high_similarity_repetition",
+                        )
+                    except Exception:
+                        pass  # 記録失敗は silently ignore
+                
                 return SafetyResult(
                     action=SafetyAction.BLOCK,
                     reason="infinite_loop_detected",
