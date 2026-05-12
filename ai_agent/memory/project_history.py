@@ -159,6 +159,55 @@ class ProjectHistoryStore:
         """全プロジェクト履歴をリスト"""
         return list(self.entries.values())
 
+    def get_recent(self, n: int = 10) -> List[ProjectHistoryEntry]:
+        """最新のプロジェクト履歴を取得
+        
+        Args:
+            n: 取得する件数
+            
+        Returns:
+            最新のプロジェクト履歴（更新時刻降順）
+        """
+        entries = list(self.entries.values())
+        entries.sort(key=lambda e: e.updated_at, reverse=True)
+        return entries[:n]
+
+    def get_lessons(self, k: int = 10) -> List[str]:
+        """過去の教訓を抽出
+        
+        Args:
+            k: 取得する教訓の数
+            
+        Returns:
+            教訓のリスト
+        """
+        lessons = []
+        for entry in self.entries.values():
+            for lesson in entry.lessons:
+                lessons.append(f"[{entry.project_id}] {lesson}")
+        
+        # 更新時刻降順にソート
+        lessons.sort(reverse=True)
+        return lessons[:k]
+
+    def get_decisions(self, k: int = 10) -> List[str]:
+        """過去の決定事項を抽出
+        
+        Args:
+            k: 取得する決定事項の数
+            
+        Returns:
+            決定事項のリスト
+        """
+        decisions = []
+        for entry in self.entries.values():
+            for decision in entry.decisions:
+                decisions.append(f"[{entry.project_id}] {decision}")
+        
+        # 更新時刻降順にソート
+        decisions.sort(reverse=True)
+        return decisions[:k]
+
     def update_status(self, project_id: str, status: str):
         """プロジェクトの状態を更新"""
         entry = self.entries.get(project_id)

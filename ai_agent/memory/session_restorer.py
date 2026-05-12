@@ -27,18 +27,24 @@ class SessionRestorer:
         self.project_history_store = ProjectHistoryStore(project_history_dir)
         self.restored_sessions: List[Dict[str, Any]] = []
 
-    def restore(self, query: str, k: int = 3) -> List[Dict[str, Any]]:
+    def restore(self, query: str, k: int = 3, include_all: bool = False) -> List[Dict[str, Any]]:
         """
         関連する過去のセッション履歴を復元
 
         Args:
             query: 検索クエリ
             k: 返す結果数
+            include_all: Trueの場合、プロジェクト履歴に関係なく最新のセッションを復元
 
         Returns:
             復元されたセッション履歴のリスト
         """
         self.restored_sessions = []
+
+        # include_all=True の場合、最新のセッションを復元
+        if include_all:
+            self.restored_sessions = self.get_recent_sessions(k)
+            return self.restored_sessions
 
         # プロジェクト履歴から関連するプロジェクトを検索
         related_projects = self.project_history_store.search(query, k=k)
@@ -54,6 +60,35 @@ class SessionRestorer:
                     self.restored_sessions.append(session_data)
 
         return self.restored_sessions
+
+    def get_recent_sessions(self, n: int = 5) -> List[Dict[str, Any]]:
+        """最新のセッション履歴を取得
+        
+        Args:
+            n: 取得するセッション数
+            
+        Returns:
+            最新のセッション履歴（更新時刻降順）
+        """
+        sessions = []
+        if not self.storage_dir.exists():
+            return sessions
+
+        # 全セッションファイルを取得
+        session_files = []
+        for file_path in self.storage_dir.glob("*.json"):
+            session_files.append(file_path)
+
+        # 更新時刻でソート
+        session_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+
+        # 上位n件を取得
+        for file_path in session_files[:n]:
+            session_data = self._load_session(file_path)
+            if session_data:
+                sessions.append(session_data)
+
+        return sessions
 
     def _find_sessions_by_project(self, project_id: str) -> List[Path]:
         """プロジェクトIDに関連するセッションファイルを検索"""

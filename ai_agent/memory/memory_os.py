@@ -338,6 +338,34 @@ class MemoryOS:
         self.stats["total_consolidated"] += count
         return count
     
+    def consolidate_high_importance(self, threshold: float = 0.8) -> int:
+        """
+        重要度が高い記憶を強制的に長期メモリへ移動。
+        
+        Args:
+            threshold: 重要度の閾値
+            
+        Returns:
+            移動されたエントリ数
+        """
+        count = 0
+        
+        # 重要度が高いエントリを検索
+        high_importance_entries = [
+            entry for entry in self.short_term_memory.values()
+            if entry.importance >= threshold
+        ]
+        
+        # 長期メモリへ移動
+        for entry in high_importance_entries:
+            entry.layer = MemoryLayer.LONG_TERM
+            self.long_term_memory[entry.id] = entry
+            del self.short_term_memory[entry.id]
+            count += 1
+        
+        self.stats["total_consolidated"] += count
+        return count
+    
     # ========================================
     # 忘却
     # ========================================
