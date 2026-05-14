@@ -404,6 +404,18 @@ class UserProfileUpdater:
         for m in user_messages:
             content = m.get("content", "")
             
+            # コードブロックの言語指定からの検出 (例: ```typescript → TypeScript)
+            lang_spec_matches = re.findall(r'```(\w+)', content)
+            for lang_spec in lang_spec_matches:
+                # 言語指定をknown_languagesと照合
+                for lang in known_languages:
+                    if lang.lower() == lang_spec.lower():
+                        languages_found.append(lang)
+                # フレームワーク指定もチェック
+                for fw in known_frameworks:
+                    if fw.lower() == lang_spec.lower():
+                        frameworks_found.append(fw)
+
             # コードブロック内のみを検出対象にする
             code_blocks = re.findall(r'```(?:\w+)?\n(.*?)```', content, re.DOTALL)
             for code_block in code_blocks:
