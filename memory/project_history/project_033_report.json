@@ -1,0 +1,21 @@
+{
+  "project_id": "project_033_report",
+  "title": "QueryQuest Project_033 Report",
+  "summary": "#",
+  "content": "# QueryQuest Project_033 Report\n## Project_032からの移行\n\n---\n\n## チャット内容の概要\n\n### 議論されたトピック\n- LM Studioチャットネームとファイルシステムの対応関係\n- プロジェクト番号の統一\n\n---\n\n## 完了状態\n- [x] LM Studioチャットネーム（Project_001〜033）とファイルシステムの対応関係確立\n- [x] 不足していたプロジェクト番号のファイル作成\n- [x] project_master.jsonの更新\n\n---\n\n*Project_033チャット内容の記録*\n",
+  "decisions": [
+    "LM Studioチャットネーム（Project_001〜033）とファイルシステムの対応関係確立",
+    "不足していたプロジェクト番号のファイル作成",
+    "project_master.jsonの更新"
+  ],
+  "problems": [],
+  "solutions": [],
+  "lessons": [],
+  "status": "completed",
+  "created_at": 1778601829.865818,
+  "updated_at": 1778601829.865818,
+  "tags": [
+    "imported"
+  ],
+  "metadata": {}
+}

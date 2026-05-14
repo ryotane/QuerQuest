@@ -1,0 +1,17 @@
+{
+  "project_id": "project_17",
+  "title": "Real-Life Usage Scenarios",
+  "summary": "要約なし",
+  "content": "# QueryQuest Project_17 - Real-Life Usage Scenarios\n\n## 基本方針\n- Runtime は生活の主役ではない\n- 静かに存在し、必要に応じて応答する\n- 過剰な関与は禁止\n\n---\n\n## シナリオ定義\n\n| Scenario | Goal | Frequency |\n|----------|------|-----------|\n| iPhoneから確認 | calm remote presence | 1-2回/日 |\n| 長時間放置 | idle calmness | 常時 |\n| restart後再開 | recovery reassurance | 必要時 |\n| continuation利用 | soft continuity | 作業中 |\n| 朝の起動 | gentle wake-up | 1回/日 |\n| 作業中の存在 | quiet companion | 作業中 |\n| 夜の終了 | calm shutdown | 1回/日 |\n\n---\n\n## シナリオ詳細\n\n### 1. iPhoneから確認 (calm remote presence)\n- **目的**: Runtime の状態を静かに確認する\n- **期待動作**: \n  - 最小限のステータス表示（稼働中/停止）\n  - 通知はバッチ配信（1日5回まで）\n  - chat app ではない\n- **禁止**: リアルタイム同期、頻繁な通知\n\n### 2. 長時間放置 (idle calmness)\n- **目的**: 存在を維持しつつリソース消費を抑える\n- **期待動作**: \n  - バックグラウンドインフラのみ稼働\n  - メモリ圧縮（70%でトリガー）\n  - 強制想起禁止\n- **禁止**: 不要なプロセス、メモリ洪水\n\n### 3. restart後再開 (recovery reassurance)\n- **目的**: 停止からの静かな復帰\n- **期待動作**: \n  - invisible_hydration（目に見えない状態復元）\n  - サイレントリカバリ\n  - 強制継続禁止\n- **禁止**: 冗長なログ、強制的な再開\n\n### 4. continuation利用 (soft continuity)\n- **目的**: 中断からの自然な再開\n- **期待動作**: \n  - natural_resume_enabled（自然な再開有効）\n  - 中断の許容\n  - 強制継続禁止\n- **禁止**: 強制再開、コンテキストの押し付け\n\n### 5. 朝の起動 (gentle wake-up)\n- **目的**: 一日の始まりを静かに開始する\n- **期待動作**: \n  - 最小限のステータス確認\n  - 前日の状態の静かな復元\n  - 過剰なサマリー禁止\n- **禁止**: 冗長な朝礼、強制通知\n\n### 6. 作業中の存在 (quiet companion)\n- **目的**: 邪魔しないが、必要な時に存在する\n- **期待動作**: \n  - focus_mode_detection（集中状態検出）\n  - repeated_interruption_suppression（繰り返し中断抑制）\n  - passive_waiting_behavior（受動的待機動作）\n- **禁止**: 頻繁な提案、強制介入\n\n### 7. 夜の終了 (calm shutdown)\n- **目的**: 一日の終わりを静かに迎える\n- **期待動作**: \n  - バックグラウンドインフラの最小化\n  - メモリの静かなアーカイブ\n  - 強制シャットダウン禁止\n- **禁止**: 冗長なログ、強制保存\n",
+  "decisions": [],
+  "problems": [],
+  "solutions": [],
+  "lessons": [],
+  "status": "completed",
+  "created_at": 1778601829.8602052,
+  "updated_at": 1778601829.8602052,
+  "tags": [
+    "imported"
+  ],
+  "metadata": {}
+}

@@ -1,0 +1,17 @@
+{
+  "project_id": "project_26",
+  "title": "Quiet Projection Budget Definition",
+  "summary": "要約なし",
+  "content": "# QueryQuest Project_26 - Quiet Projection Budget Definition\n\n## テーマ: 「projection memory explosion」と「visualization addiction」の防止\n\n---\n\n## Core Principle\n\n**Projectionは、常に最小限のリソースで実行される。**\n\n- max projection frequency: 1回/分（ユーザー要求時）\n- max projection depth: 3 levels\n- max projection persistence: ephemeral（デフォルト）\n- max projection token size: 500 tokens\n\n---\n\n## Budget Definition\n\n### 1. Max Projection Frequency\n| Parameter | Value | Reason |\n|-----------|-------|--------|\n| max frequency | 1回/分 | 過剰な投影を防止 |\n| cooldown period | 60秒 | 連続投影の抑制 |\n| burst limit | 3回/5分 | バースト制御 |\n\n### 2. Max Projection Depth\n| Level | Content | Size Limit |\n|-------|---------|------------|\n| Level 1 | minimal state（5フィールド） | 500 bytes |\n| Level 2 | flow summary（3項目まで） | 1,000 bytes |\n| Level 3 | event detail（圧縮済み、10件まで） | 2,000 bytes |\n\n**合計: 3,500 bytes以内**\n\n### 3. Max Projection Persistence\n| Type | Persistence | Reason |\n|------|-------------|--------|\n| ephemeral | 再生成しない限り保持されない | デフォルト |\n| user-requested | ユーザーが明示的に保存する場合のみ | 例外 |\n| critical-error | エラー報告時のみ最小限の永続化 | 例外 |\n\n### 4. Max Projection Token Size\n| Parameter | Value | Reason |\n|-----------|-------|--------|\n| max tokens | 500 tokens | semantic memory explosion防止 |\n| warning threshold | 300 tokens | 警告発令 |\n| critical threshold | 400 tokens | 緊急停止 |\n\n---\n\n## Budget Enforcement Rules\n\n1. **no projection without budget** - バジェット超過時は投影しない\n2. **no recursive projection** - 再帰的な投影は禁止\n3. **no persistent projection by default** - デフォルトはephemeral\n4. **no high-frequency projection** - 頻繁な投影は禁止\n\n---\n\n## Budget Monitoring\n\n| Metric | Check Interval | Action on Exceedance |\n|--------|---------------|---------------------|\n| projection frequency | 1分ごと | 冷却期間延長 |\n| projection depth | リクエスト時 | Level 2以降の抑制 |\n| projection persistence | 保存時 | ephemeral強制 |\n| projection token size | 生成時 | トランケーション |\n\n---\n\n*Project_26 - Quiet Projection Budget Definition*\n*\"projection memory explosionとvisualization addictionの防止\"*\n",
+  "decisions": [],
+  "problems": [],
+  "solutions": [],
+  "lessons": [],
+  "status": "completed",
+  "created_at": 1778601829.8650088,
+  "updated_at": 1778601829.8650088,
+  "tags": [
+    "imported"
+  ],
+  "metadata": {}
+}

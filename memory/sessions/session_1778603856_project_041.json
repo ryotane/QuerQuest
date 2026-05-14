@@ -1,0 +1,23 @@
+{
+  "session_id": "session_1778603856_project_041",
+  "project_id": "project_041",
+  "created_at": 1778603856.9846919,
+  "updated_at": 1778603856.985376,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Project_041を開始します。",
+      "timestamp": 1778603856.984894
+    },
+    {
+      "role": "assistant",
+      "content": "了解しました。過去を振り返る能力と長期記憶を実現します。",
+      "timestamp": 1778603856.985276
+    }
+  ],
+  "metadata": {
+    "summary": "Project_041を開始します。\n了解しました。過去を振り返る能力と長期記憶を実現します。",
+    "tags": [],
+    "completed_at": 1778603856.985536
+  }
+}

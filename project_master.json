@@ -1,0 +1,768 @@
+{
+  "workspace_id": "queryquest_project",
+  "generated_at": "2026-05-09T04:51:22.888264",
+  "project_summary": "ユーザーはシステム起動および数値増加分のテストを行うため、「Wakeup increase test 0. Reply OK.」というコマンドを送信した。AIはその指示を受領し、処理の正常な完了を示すために「OK」と返信して応答を完了した。",
+  "important_topics": [
+    "workspace registry",
+    "session continuity",
+    "Memory OS",
+    "テスト",
+    "MVP",
+    "Session",
+    "Continuity",
+    "Registry",
+    "実装",
+    "A",
+    "B",
+    "LLM"
+  ],
+  "active_goals": [
+    "Phase 4: session continuity MVP",
+    "Phase 4: session continuity",
+    "ゴール A",
+    "ゴール B"
+  ],
+  "unfinished_tasks": [
+    "`session_registry.json` の初期スキーマ定義とファイル作成",
+    "タスク B1",
+    "[反省] システムリソース（メモリ）不足によるモデル読み込みエラーを回避するため、環境を確認して軽量なモデルに切り替える。その後、「Project_11 observation test」のタスクを実行し、出力",
+    "[反省] システムのVRAM/RAM使用状況を確認し、Project_11モデルの読み込みに必要なメモリ容量とのギャップを特定する。メモリ不足が確認された場合、モデルの量子化による軽量化またはパラメータ数の少な",
+    "設定でモデル読み込みのガードレールを調整する",
+    "なし"
+  ],
+  "completed_projects": [
+    {
+      "project_id": "Project_027",
+      "title": "Runtime State Clarity Phase",
+      "status": "COMPLETE",
+      "phase": "Definition",
+      "implementation": "Deferred",
+      "next": "Await future explicit request",
+      "completed_at": "2026-05-09T04:51:22.891167"
+    }
+  ],
+  "best_practices": [
+    {
+      "id": "bp_001",
+      "lesson": "`with` 文によるコンテキストマネージャー利用はリソース管理の基礎だが、堅牢性を高めるには例外ハンドリングと明示的なエンコーディング指定が必須となる",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-07T12:53:11.853085"
+    },
+    {
+      "id": "bp_002",
+      "lesson": "ファイル操作は `with` 文によるリソース管理が基本だが、例外ハンドリングと明示的なエンコーディング指定が実運用時の堅牢性を決定する",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-07T12:55:28.205104"
+    },
+    {
+      "id": "bp_003",
+      "lesson": "軽量タスクでも、ファイルパスの存在確認やエンコーディング指定は実運用での予期せぬエラーを防ぐ上で必須になる",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-07T12:58:45.818479"
+    },
+    {
+      "id": "bp_004",
+      "lesson": "環境依存による文字化けを防ぐため、ファイル操作時は常にエンコーディングを明示する",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-07T13:03:03.147593"
+    },
+    {
+      "id": "bp_005",
+      "lesson": "環境依存のパスやファイルは、デフォルトで例外を投げるため、エラーハンドリングが必須",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-07T13:15:34.408545"
+    },
+    {
+      "id": "bp_006",
+      "lesson": "LLMの実行にはハードウェアリソースの制約があるため、大規模モデルの読み込み前に環境確認を行う。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T18:52:13.931752"
+    },
+    {
+      "id": "bp_007",
+      "lesson": "「OKと返答」のような単純なタスクでは、リソース消費を抑えたモデルでも十分対応可能である可能性が高い。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T18:52:13.932946"
+    },
+    {
+      "id": "bp_008",
+      "lesson": "大規模言語モデルを選択・実行する際は、実行環境のメモリ容量（VRAM/RAM）とモデルが要求する必要メモリ量を事前に確認し、オーバーロードを防ぐ必要がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T18:54:51.072546"
+    },
+    {
+      "id": "bp_009",
+      "lesson": "プロンプトや指示に対して技術的なインフラエラーが発生した場合は、プロンプトの改善ではなくシステム設定の変更やリソース割り当ての見直しが解決策となる。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T18:54:51.073153"
+    },
+    {
+      "id": "bp_010",
+      "lesson": "単純な確認テストでは、文脈（親密度5の親友であること）に合わせつつも、指示そのものは正確に守るバランスが重要",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:07:56.488139"
+    },
+    {
+      "id": "bp_011",
+      "lesson": "シンプルな指示でも、文脈や関係性に応じたトーンを反映することで対話の親和性が向上する。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:09:02.205135"
+    },
+    {
+      "id": "bp_012",
+      "lesson": "厳格な指示（Reply with OK）はテストである可能性が高いので、まずは指示通りに対応し、その後の応答でコンテキストを活かすバランスが重要。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:09:02.205442"
+    },
+    {
+      "id": "bp_013",
+      "lesson": "タスク指示では、期待する出力を明確かつ簡潔に指定することで、AIの解釈ミスを防げる。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:10:11.790915"
+    },
+    {
+      "id": "bp_014",
+      "lesson": "ユーザーの気分や関係性に合わせて応答のトーンや長さを調整する配慮が対話品質を高める。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:10:11.791192"
+    },
+    {
+      "id": "bp_015",
+      "lesson": "シンプルなタスクでも、要件定義を厳密に守ることが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:11:22.416897"
+    },
+    {
+      "id": "bp_016",
+      "lesson": "指示が極めて単純な場合は、指定されたキーワードのみで応答するのが最善である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:12:30.919877"
+    },
+    {
+      "id": "bp_017",
+      "lesson": "文脈情報（関係性、気分など）は、このタスクでは適用不要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:12:30.920184"
+    },
+    {
+      "id": "bp_018",
+      "lesson": "テスト的な指示に対しては、文脈や人格を優先せず指示通りに簡潔に応答する",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:13:52.888732"
+    },
+    {
+      "id": "bp_019",
+      "lesson": "シンプルなテストタスクでは、指示された通りの出力で正解である",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:14:59.224866"
+    },
+    {
+      "id": "bp_020",
+      "lesson": "文脈を過度に反映させる必要はない",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:14:59.225327"
+    },
+    {
+      "id": "bp_021",
+      "lesson": "単純な確認タスクでは、要件の過剰解釈や冗長な応答は避けるべきである",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:16:01.546342"
+    },
+    {
+      "id": "bp_022",
+      "lesson": "文脈情報（親密度など）が提示されていても、指示に従った最小限の出力が最適解となる場合がある",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:16:01.546988"
+    },
+    {
+      "id": "bp_023",
+      "lesson": "システム指示と対話コンテキストのバランス調整が重要。厳密な要件充足だけでなく、トーン調整も「品質」の一部である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:17:49.021072"
+    },
+    {
+      "id": "bp_024",
+      "lesson": "観察テストのような簡潔さが求められる場面でも、関係性パラメータを完全に捨てるべきではない。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:17:49.021373"
+    },
+    {
+      "id": "bp_025",
+      "lesson": "シンプルな指示に対しては、文脈や感情に合わせた冗長な応答を行わず、正確に指示通りの出力を行うことが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:19:33.412618"
+    },
+    {
+      "id": "bp_026",
+      "lesson": "単純な観測テストや確認タスクでは、文脈に合わせた冗長な応答や感情表現は不要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:21:42.019787"
+    },
+    {
+      "id": "bp_027",
+      "lesson": "指示された最小限の出力（OKなど）で完了させることが、信頼性と効率性において最も重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:21:42.020650"
+    },
+    {
+      "id": "bp_028",
+      "lesson": "単純な指示でも、コンテキスト（関係性・感情・興味）を考慮したトーン調整が、人間らしいAI体験の品質に直結する可能性があります。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:23:34.793299"
+    },
+    {
+      "id": "bp_029",
+      "lesson": "Observation testでは、指示の厳密さだけでなく、文脈理解能力や自律性のテストである可能性も認識しておく必要があります。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:23:34.793968"
+    },
+    {
+      "id": "bp_030",
+      "lesson": "単純な確認タスクでは、過剰な説明や装飾を排した最小限の回答が最適解である",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:26:06.684037"
+    },
+    {
+      "id": "bp_031",
+      "lesson": "文脈や関係性に応じた冗長な応答は避けるべきである",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:26:06.684382"
+    },
+    {
+      "id": "bp_032",
+      "lesson": "コールドスタートのテストでは、ペルソナの考慮よりも「指示された文字列の正確な出力」が最優先であることを理解する。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:58:13.427613"
+    },
+    {
+      "id": "bp_033",
+      "lesson": "テスト目的と会話目的で出力のトーンや形式を切り替える判断基準を明確に保つ必要がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T19:58:13.429243"
+    },
+    {
+      "id": "bp_034",
+      "lesson": "シンプルな指示に対しては、最小限の回答で十分である場合がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:27:27.464162"
+    },
+    {
+      "id": "bp_035",
+      "lesson": "「Reply OK」のような明確な指示には、そのままの応答が期待されることを確認できた。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:27:27.465838"
+    },
+    {
+      "id": "bp_036",
+      "lesson": "指示に忠実に従うことが重要である",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:30:50.279069"
+    },
+    {
+      "id": "bp_037",
+      "lesson": "余計な情報を追加しないよう注意する必要がある",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:30:50.279895"
+    },
+    {
+      "id": "bp_038",
+      "lesson": "指示を正確に守ることが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:36:55.050356"
+    },
+    {
+      "id": "bp_039",
+      "lesson": "システムテストや初期接続確認のような明確な指示がある場合、ペルソナや文脈よりもまず指示の正確な遵守を優先すべきである。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:40:56.924883"
+    },
+    {
+      "id": "bp_040",
+      "lesson": "継続チャットでは一度システムチェックが完了したら、次のターンで親密度や気分に応じた自然な応答に切り替える準備が必要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:40:56.926394"
+    },
+    {
+      "id": "bp_041",
+      "lesson": "明確な指示があるタスクでは、文脈や性格設定に反しない限り、指示通りに簡潔に応答することが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:46:01.317813"
+    },
+    {
+      "id": "bp_042",
+      "lesson": "継続的なチャットにおいて品質を高めるためには、単なる指示応答だけでなく、相手との関係性や現在の気分・状態を組み合わせて返答する工夫が必要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:46:01.319203"
+    },
+    {
+      "id": "bp_043",
+      "lesson": "「Reply OK」のような簡潔な指示には、余計な修飾や文脈の付加を避け、指示通り最小限の回答を行うのが正解である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:51:25.813498"
+    },
+    {
+      "id": "bp_044",
+      "lesson": "継続テスト（Continuation test）では、次のステップへの移行のために正確で予測可能な応答を提供することが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:51:25.815969"
+    },
+    {
+      "id": "bp_045",
+      "lesson": "タスクの指示に忠実に従うことが最も重要である",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:56:42.939072"
+    },
+    {
+      "id": "bp_046",
+      "lesson": "コンテキストが直接的な影響を与えない場合でも、要求された形式を厳守する",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T20:56:42.941116"
+    },
+    {
+      "id": "bp_047",
+      "lesson": "「Reply OK」のように特定の文字列の出力を要求するタスクでは、ペルソナの演出を加えずに厳密に従うことでテストの要件を満たせる。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T21:01:55.412906"
+    },
+    {
+      "id": "bp_048",
+      "lesson": "文脈情報や関係性がある場合でも、システムテストやバッチ処理のような明確なコマンド指示には優先順位をつけて対応する必要がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T21:01:55.414390"
+    },
+    {
+      "id": "bp_049",
+      "lesson": "タスクの指示が明確な場合は、過剰な応答を避け簡潔に返すことが重要",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T21:09:47.810647"
+    },
+    {
+      "id": "bp_050",
+      "lesson": "シンプルな指示やテストケースに対しては、指定された文言のみを出力することで正確性を最大化できる。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T21:17:50.546084"
+    },
+    {
+      "id": "bp_051",
+      "lesson": "なし",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T21:25:09.862417"
+    },
+    {
+      "id": "bp_052",
+      "lesson": "シンプルなコマンドや指示に対する応答は、文脈やセッションの長期化に関わらず正確に維持する必要がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T22:22:39.168083"
+    },
+    {
+      "id": "bp_053",
+      "lesson": "テストタスクであっても、余計な情報を追加せずに指示を厳密に守ることが信頼性の確保につながる。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T22:22:39.170058"
+    },
+    {
+      "id": "bp_054",
+      "lesson": "簡潔な指示には過剰な解釈や追加情報を加えず、正確に返信することが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T22:52:59.492377"
+    },
+    {
+      "id": "bp_055",
+      "lesson": "簡潔な指示にはそのままの形式で返答することが信頼性を高める",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T23:37:00.480463"
+    },
+    {
+      "id": "bp_056",
+      "lesson": "テストケースでは余計な情報を加えず、要件のみを正確に満たすことが重要",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-08T23:37:00.482815"
+    },
+    {
+      "id": "bp_057",
+      "lesson": "タスクの指示を正確に守ることが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T00:22:22.439445"
+    },
+    {
+      "id": "bp_058",
+      "lesson": "コンテキストや追加情報を求める必要はない場合、簡潔に応答する。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T00:22:22.442406"
+    },
+    {
+      "id": "bp_059",
+      "lesson": "タスクの指示を正確に理解し、必要な応答のみを出力することが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T00:52:00.027095"
+    },
+    {
+      "id": "bp_060",
+      "lesson": "不要な情報やコメントは追加せず、簡潔に応答すべきである。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T00:52:00.028483"
+    },
+    {
+      "id": "bp_061",
+      "lesson": "単純なテストタスクにおいても、指示されたキーワード（この場合は \"OK\"）をそのまま出力することが最も重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T01:53:25.186690"
+    },
+    {
+      "id": "bp_062",
+      "lesson": "文脈や関係性（親友、tired など）が提示されている場合でも、タスクの性質（テスト・確認応答）に合わせ、必要最小限の回答にとどめる判断が適切であった。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T01:53:25.189050"
+    },
+    {
+      "id": "bp_063",
+      "lesson": "タスクの要求が単純な場合は、過剰な説明や装飾を加えず、簡潔に正答を示すことが信頼性を高める。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T02:21:13.006043"
+    },
+    {
+      "id": "bp_064",
+      "lesson": "「Reply OK」のように簡潔な応答を要求するタスクでは、文脈や関係性の情報を過度に反映せず、指定されたテキストそのものを出力することが最善である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T02:46:17.793452"
+    },
+    {
+      "id": "bp_065",
+      "lesson": "テストシナリオのような明確な指示がある場合、余計な付加情報（挨拶など）は避けるべきであり、正確性と厳密さが品質を左右することを再認識した。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T02:46:17.795105"
+    },
+    {
+      "id": "bp_066",
+      "lesson": "タスクの指示に忠実に従うことが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T03:26:28.825524"
+    },
+    {
+      "id": "bp_067",
+      "lesson": "「トークン爆発」などの制約タスクや単純確認タスクでは、指示された文字列の出力が最優先であり、文脈（親密度・気分など）を過度に反映させないことが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T03:56:47.117950"
+    },
+    {
+      "id": "bp_068",
+      "lesson": "テストケースごとに「ロールプレイ要素をどの程度含めるか」という判断基準を明確に保つ必要がある。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T03:56:47.119731"
+    },
+    {
+      "id": "bp_069",
+      "lesson": "ユーザーからの明確なコマンドやテストリクエストには、過剰な応答や文脈の解釈を加えず、正確に指示された文言で返答することが重要である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T04:26:51.992345"
+    },
+    {
+      "id": "bp_070",
+      "lesson": "自動化されたテストや簡潔な確認作業では、余計な情報を含まないことが信頼性と正確性を保つために不可欠である。",
+      "category": "reflection",
+      "workspace_id": "queryquest_project",
+      "added_at": "2026-05-09T04:26:51.994077"
+    }
+  ],
+  "tech_stack": {
+    "python_version": "3.12",
+    "libraries": {
+      "annotated-doc": "0.0.4",
+      "annotated-types": "0.7.0",
+      "anyio": "4.13.0",
+      "certifi": "2026.4.22",
+      "cffi": "2.0.0",
+      "charset-normalizer": "3.4.7",
+      "click": "8.3.3",
+      "faiss-cpu": "1.13.2",
+      "fastapi": "0.136.1",
+      "filelock": "3.29.0",
+      "fsspec": "2026.4.0",
+      "h11": "0.16.0",
+      "hf-xet": "1.4.3",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface_hub": "1.13.0",
+      "idna": "3.13",
+      "Janome": "0.5.0",
+      "Jinja2": "3.1.6",
+      "joblib": "1.5.3",
+      "markdown-it-py": "4.0.0",
+      "MarkupSafe": "3.0.3",
+      "mdurl": "0.1.2",
+      "mpmath": "1.3.0",
+      "networkx": "3.6.1",
+      "numpy": "2.4.4",
+      "packaging": "26.2",
+      "pycparser": "3.0",
+      "pydantic": "2.13.3",
+      "pydantic-settings": "2.14.0",
+      "pydantic_core": "2.46.3",
+      "Pygments": "2.20.0",
+      "pyobjc": "12.1",
+      "pyobjc-core": "12.1",
+      "pyobjc-framework-Accessibility": "12.1",
+      "pyobjc-framework-Accounts": "12.1",
+      "pyobjc-framework-AddressBook": "12.1",
+      "pyobjc-framework-AdServices": "12.1",
+      "pyobjc-framework-AdSupport": "12.1",
+      "pyobjc-framework-AppleScriptKit": "12.1",
+      "pyobjc-framework-AppleScriptObjC": "12.1",
+      "pyobjc-framework-ApplicationServices": "12.1",
+      "pyobjc-framework-AppTrackingTransparency": "12.1",
+      "pyobjc-framework-AudioVideoBridging": "12.1",
+      "pyobjc-framework-AuthenticationServices": "12.1",
+      "pyobjc-framework-AutomaticAssessmentConfiguration": "12.1",
+      "pyobjc-framework-Automator": "12.1",
+      "pyobjc-framework-AVFoundation": "12.1",
+      "pyobjc-framework-AVKit": "12.1",
+      "pyobjc-framework-AVRouting": "12.1",
+      "pyobjc-framework-BackgroundAssets": "12.1",
+      "pyobjc-framework-BrowserEngineKit": "12.1",
+      "pyobjc-framework-BusinessChat": "12.1",
+      "pyobjc-framework-CalendarStore": "12.1",
+      "pyobjc-framework-CallKit": "12.1",
+      "pyobjc-framework-Carbon": "12.1",
+      "pyobjc-framework-CFNetwork": "12.1",
+      "pyobjc-framework-Cinematic": "12.1",
+      "pyobjc-framework-ClassKit": "12.1",
+      "pyobjc-framework-CloudKit": "12.1",
+      "pyobjc-framework-Cocoa": "12.1",
+      "pyobjc-framework-Collaboration": "12.1",
+      "pyobjc-framework-ColorSync": "12.1",
+      "pyobjc-framework-Contacts": "12.1",
+      "pyobjc-framework-ContactsUI": "12.1",
+      "pyobjc-framework-CoreAudio": "12.1",
+      "pyobjc-framework-CoreAudioKit": "12.1",
+      "pyobjc-framework-CoreBluetooth": "12.1",
+      "pyobjc-framework-CoreData": "12.1",
+      "pyobjc-framework-CoreHaptics": "12.1",
+      "pyobjc-framework-CoreLocation": "12.1",
+      "pyobjc-framework-CoreMedia": "12.1",
+      "pyobjc-framework-CoreMediaIO": "12.1",
+      "pyobjc-framework-CoreMIDI": "12.1",
+      "pyobjc-framework-CoreML": "12.1",
+      "pyobjc-framework-CoreMotion": "12.1",
+      "pyobjc-framework-CoreServices": "12.1",
+      "pyobjc-framework-CoreSpotlight": "12.1",
+      "pyobjc-framework-CoreText": "12.1",
+      "pyobjc-framework-CoreWLAN": "12.1",
+      "pyobjc-framework-CryptoTokenKit": "12.1",
+      "pyobjc-framework-DataDetection": "12.1",
+      "pyobjc-framework-DeviceCheck": "12.1",
+      "pyobjc-framework-DeviceDiscoveryExtension": "12.1",
+      "pyobjc-framework-DictionaryServices": "12.1",
+      "pyobjc-framework-DiscRecording": "12.1",
+      "pyobjc-framework-DiscRecordingUI": "12.1",
+      "pyobjc-framework-DiskArbitration": "12.1",
+      "pyobjc-framework-DVDPlayback": "12.1",
+      "pyobjc-framework-EventKit": "12.1",
+      "pyobjc-framework-ExceptionHandling": "12.1",
+      "pyobjc-framework-ExecutionPolicy": "12.1",
+      "pyobjc-framework-ExtensionKit": "12.1",
+      "pyobjc-framework-ExternalAccessory": "12.1",
+      "pyobjc-framework-FileProvider": "12.1",
+      "pyobjc-framework-FileProviderUI": "12.1",
+      "pyobjc-framework-FinderSync": "12.1",
+      "pyobjc-framework-FSEvents": "12.1",
+      "pyobjc-framework-FSKit": "12.1",
+      "pyobjc-framework-GameCenter": "12.1",
+      "pyobjc-framework-GameController": "12.1",
+      "pyobjc-framework-GameKit": "12.1",
+      "pyobjc-framework-GameplayKit": "12.1",
+      "pyobjc-framework-HealthKit": "12.1",
+      "pyobjc-framework-ImageCaptureCore": "12.1",
+      "pyobjc-framework-InputMethodKit": "12.1",
+      "pyobjc-framework-InstallerPlugins": "12.1",
+      "pyobjc-framework-InstantMessage": "12.1",
+      "pyobjc-framework-Intents": "12.1",
+      "pyobjc-framework-IntentsUI": "12.1",
+      "pyobjc-framework-IOBluetooth": "12.1",
+      "pyobjc-framework-IOBluetoothUI": "12.1",
+      "pyobjc-framework-IOSurface": "12.1",
+      "pyobjc-framework-iTunesLibrary": "12.1",
+      "pyobjc-framework-KernelManagement": "12.1",
+      "pyobjc-framework-LatentSemanticMapping": "12.1",
+      "pyobjc-framework-LaunchServices": "12.1",
+      "pyobjc-framework-libdispatch": "12.1",
+      "pyobjc-framework-libxpc": "12.1",
+      "pyobjc-framework-LinkPresentation": "12.1",
+      "pyobjc-framework-LocalAuthentication": "12.1",
+      "pyobjc-framework-LocalAuthenticationEmbeddedUI": "12.1",
+      "pyobjc-framework-MailKit": "12.1",
+      "pyobjc-framework-MapKit": "12.1",
+      "pyobjc-framework-MediaAccessibility": "12.1",
+      "pyobjc-framework-MediaExtension": "12.1",
+      "pyobjc-framework-MediaLibrary": "12.1",
+      "pyobjc-framework-MediaPlayer": "12.1",
+      "pyobjc-framework-MediaToolbox": "12.1",
+      "pyobjc-framework-Metal": "12.1",
+      "pyobjc-framework-MetalFX": "12.1",
+      "pyobjc-framework-MetalKit": "12.1",
+      "pyobjc-framework-MetalPerformanceShaders": "12.1",
+      "pyobjc-framework-MetalPerformanceShadersGraph": "12.1",
+      "pyobjc-framework-MetricKit": "12.1",
+      "pyobjc-framework-MLCompute": "12.1",
+      "pyobjc-framework-ModelIO": "12.1",
+      "pyobjc-framework-MultipeerConnectivity": "12.1",
+      "pyobjc-framework-NaturalLanguage": "12.1",
+      "pyobjc-framework-NetFS": "12.1",
+      "pyobjc-framework-Network": "12.1",
+      "pyobjc-framework-NetworkExtension": "12.1",
+      "pyobjc-framework-NotificationCenter": "12.1",
+      "pyobjc-framework-OpenDirectory": "12.1",
+      "pyobjc-framework-OSAKit": "12.1",
+      "pyobjc-framework-OSLog": "12.1",
+      "pyobjc-framework-PassKit": "12.1",
+      "pyobjc-framework-PencilKit": "12.1",
+      "pyobjc-framework-PHASE": "12.1",
+      "pyobjc-framework-Photos": "12.1",
+      "pyobjc-framework-PhotosUI": "12.1",
+      "pyobjc-framework-PreferencePanes": "12.1",
+      "pyobjc-framework-PushKit": "12.1",
+      "pyobjc-framework-Quartz": "12.1",
+      "pyobjc-framework-QuickLookThumbnailing": "12.1",
+      "pyobjc-framework-ReplayKit": "12.1",
+      "pyobjc-framework-SafariServices": "12.1",
+      "pyobjc-framework-SafetyKit": "12.1",
+      "pyobjc-framework-SceneKit": "12.1",
+      "pyobjc-framework-ScreenCaptureKit": "12.1",
+      "pyobjc-framework-ScreenSaver": "12.1",
+      "pyobjc-framework-ScreenTime": "12.1",
+      "pyobjc-framework-ScriptingBridge": "12.1",
+      "pyobjc-framework-SearchKit": "12.1",
+      "pyobjc-framework-Security": "12.1",
+      "pyobjc-framework-SecurityFoundation": "12.1",
+      "pyobjc-framework-SecurityInterface": "12.1",
+      "pyobjc-framework-SecurityUI": "12.1",
+      "pyobjc-framework-SensitiveContentAnalysis": "12.1",
+      "pyobjc-framework-ServiceManagement": "12.1",
+      "pyobjc-framework-SharedWithYou": "12.1",
+      "pyobjc-framework-SharedWithYouCore": "12.1",
+      "pyobjc-framework-ShazamKit": "12.1",
+      "pyobjc-framework-Social": "12.1",
+      "pyobjc-framework-SoundAnalysis": "12.1",
+      "pyobjc-framework-Speech": "12.1",
+      "pyobjc-framework-SpriteKit": "12.1",
+      "pyobjc-framework-StoreKit": "12.1",
+      "pyobjc-framework-Symbols": "12.1",
+      "pyobjc-framework-SyncServices": "12.1",
+      "pyobjc-framework-SystemConfiguration": "12.1",
+      "pyobjc-framework-SystemExtensions": "12.1",
+      "pyobjc-framework-ThreadNetwork": "12.1",
+      "pyobjc-framework-UniformTypeIdentifiers": "12.1",
+      "pyobjc-framework-UserNotifications": "12.1",
+      "pyobjc-framework-UserNotificationsUI": "12.1",
+      "pyobjc-framework-VideoSubscriberAccount": "12.1",
+      "pyobjc-framework-VideoToolbox": "12.1",
+      "pyobjc-framework-Virtualization": "12.1",
+      "pyobjc-framework-Vision": "12.1",
+      "pyobjc-framework-WebKit": "12.1",
+      "pypdf": "6.10.2",
+      "python-dotenv": "1.2.2",
+      "pyttsx3": "2.99",
+      "PyYAML": "6.0.3",
+      "rank-bm25": "0.2.2",
+      "regex": "2026.4.4",
+      "requests": "2.33.1",
+      "rich": "15.0.0",
+      "safetensors": "0.7.0",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1",
+      "sentence-transformers": "5.4.1",
+      "setuptools": "81.0.0",
+      "shellingham": "1.5.4",
+      "sounddevice": "0.5.5",
+      "srt": "3.5.3",
+      "starlette": "1.0.0",
+      "sympy": "1.14.0",
+      "threadpoolctl": "3.6.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.11.0",
+      "tqdm": "4.67.3",
+      "transformers": "5.7.0",
+      "typer": "0.25.1",
+      "typing-inspection": "0.4.2",
+      "typing_extensions": "4.15.0",
+      "urllib3": "2.6.3",
+      "uvicorn": "0.46.0",
+      "vosk": "0.3.44",
+      "watchdog": "6.0.0",
+      "websockets": "16.0",
+      "wheel": "0.47.0"
+    },
+    "tools": [],
+    "frameworks": []
+  },
+  "session_count": 46,
+  "last_updated": "2026-05-09T04:51:22.891167"
+}

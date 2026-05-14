@@ -1,0 +1,287 @@
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from ai_agent.hermes.orchestrator import Orchestrator
+from ai_agent.llm.lmstudio import LMStudioClient
+from ai_agent.rag.pdf_rag import PDFRag
+from ai_agent.runtime_safety.safety_guard import CollapsePreventionLayer
+from ai_agent.memory.user_profile import get_user_profile_store
+import time
+import uuid
+import json
+import tempfile
+import os
+
+app = FastAPI()
+orch = Orchestrator()
+llm = LMStudioClient()
+pdf_rag = PDFRag()
+
+# Project_08: Runtime Collapse Prevention (startup bootstrap)
+collapse_prevention = CollapsePreventionLayer(
+    planning_ttl_seconds=5.0,
+    planning_ttl_steps=10,
+    max_plan_length=1,
+    anti_meta_threshold=2,
+    debug=False,
+)
+
+IGNORE_PREFIXES = [
+    "### Task:",
+    "### Instructions:",
+    "Generate a",
+    "Create a",
+    "Analyze the",
+    "Based on the conversation",
+    "Suggest ",
+    "Your task is",
+]
+
+
+@app.get("/v1/models")
+def models():
+    return {
+        "object": "list",
+        "data": [{"id": "queryquest", "object": "model", "owned_by": "local"}]
+    }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "queryquest"}
+
+
+# =========================================
+# Project_038: Hard Recovery Endpoint
+# =========================================
+@app.post("/stop_generation")
+async def stop_generation():
+    """
+    Hard Recovery Trigger
+    Runtimeからの緊急停止要求
+    """
+
+    print("🛑 Hard recovery triggered")
+
+    return {
+        "ok": True,
+        "status": "stopped",
+        "type": "hard_recovery"
+    }
+
+
+class ChatRequest(BaseModel):
+    model: str = "queryquest"
+    messages: list
+    stream: bool = False
+
+
+@app.post("/v1/chat/completions")
+async def chat(req: ChatRequest):
+    # ユーザーメッセージだけ抽出
+    user_messages = [m for m in req.messages if m.get("role") == "user"]
+    if not user_messages:
+        return _empty_response()
+
+    user_msg = user_messages[-1]["content"]
+
+    # WebUI内部プロンプトを無視
+    for prefix in IGNORE_PREFIXES:
+        if user_msg.strip().startswith(prefix):
+            return _empty_response()
+
+    # 会話履歴（最後のユーザーメッセージを除く）
+    history = [
+        m for m in req.messages
+        if m.get("role") in ("user", "assistant")
+    ][:-1]
+
+    # ストリーミング対応
+    if req.stream:
+        return StreamingResponse(
+            _stream_response(user_msg, history),
+            media_type="text/event-stream"
+        )
+
+    # 通常レスポンス
+    result = orch.run(user_msg, history=history)
+    answer = result.get("final", "")
+
+    return {
+        "id": f"chatcmpl-{uuid.uuid4().hex[:8]}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": "queryquest",
+        "choices": [{
+            "index": 0,
+            "message": {"role": "assistant", "content": answer},
+            "finish_reason": "stop"
+        }]
+    }
+
+
+async def _stream_response(user_msg: str, history: list):
+    """SSEストリーミングレスポンス"""
+
+    # Orchestratorで前処理（Web検索・RAG）
+    result = orch.run(user_msg, history=history)
+    answer = result.get("final", "")
+
+    chunk_id = f"chatcmpl-{uuid.uuid4().hex[:8]}"
+
+    # 文字ごとに少しずつ送る
+    words = answer.split(" ")
+
+    for i, word in enumerate(words):
+        chunk = {
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": int(time.time()),
+            "model": "queryquest",
+            "choices": [{
+                "index": 0,
+                "delta": {
+                    "content": word + (" " if i < len(words)-1 else "")
+                },
+                "finish_reason": None
+            }]
+        }
+
+        yield f"data: {json.dumps(chunk)}\n\n"
+
+    # 終了シグナル
+    final_chunk = {
+        "id": chunk_id,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": "queryquest",
+        "choices": [{
+            "index": 0,
+            "delta": {},
+            "finish_reason": "stop"
+        }]
+    }
+
+    yield f"data: {json.dumps(final_chunk)}\n\n"
+    yield "data: [DONE]\n\n"
+
+
+@app.post("/v1/rag/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    """PDFをアップロードしてRAGに追加"""
+
+    if not file.filename.endswith(".pdf"):
+        return {
+            "ok": False,
+            "error": "PDFファイルのみ対応"
+        }
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    ) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        result = pdf_rag.load_pdf(tmp_path)
+        return result
+
+    finally:
+        os.unlink(tmp_path)
+
+
+@app.get("/v1/rag/status")
+def rag_status():
+    """RAGの状態確認"""
+
+    return {
+        "ok": True,
+        "total_chunks": len(pdf_rag.texts),
+        "has_index": pdf_rag.index is not None
+    }
+
+
+@app.delete("/v1/rag/clear")
+def rag_clear():
+    """RAGデータを全削除"""
+
+    pdf_rag.clear()
+
+    return {
+        "ok": True,
+        "message": "RAGデータを削除しました"
+    }
+
+
+def _empty_response():
+    return {
+        "id": f"chatcmpl-{uuid.uuid4().hex[:8]}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": "queryquest",
+        "choices": [{
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": ""
+            },
+            "finish_reason": "stop"
+        }]
+    }
+
+
+# =========================================
+# Project_044: User Profile Management Endpoints
+# =========================================
+
+@app.get("/v1/user-profile")
+def get_user_profile(user_id: str = "default"):
+    """
+    ユーザープロファイルを取得
+    """
+    store = get_user_profile_store()
+    profile = store.get(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return profile.to_dict()
+
+
+@app.post("/v1/user-profile")
+def update_user_profile(user_id: str = "default", profile_data: dict = None):
+    """
+    ユーザープロファイルを更新
+    """
+    if not profile_data:
+        raise HTTPException(status_code=400, detail="Profile data is required")
+    
+    store = get_user_profile_store()
+    profile = store.create_or_update(user_id, **profile_data)
+    return profile.to_dict()
+
+
+@app.get("/v1/user-profile/export")
+def export_user_profile(user_id: str = "default"):
+    """
+    ユーザープロファイルをエクスポート
+    """
+    store = get_user_profile_store()
+    profile = store.get(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return profile.to_dict()
+
+
+@app.post("/v1/user-profile/import")
+def import_user_profile(profile_data: dict = None):
+    """
+    ユーザープロファイルをインポート
+    """
+    if not profile_data:
+        raise HTTPException(status_code=400, detail="Profile data is required")
+    
+    user_id = profile_data.pop('user_id', 'default')
+    store = get_user_profile_store()
+    profile = store.create_or_update(user_id, **profile_data)
+    return profile.to_dict()

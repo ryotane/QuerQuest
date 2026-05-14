@@ -1,17 +1,70 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
+*.pyo
+
+# Environments
+.env
+.venv
 env/
 venv/
-.venv/
-# OS
+ENV/
+ai-env/
+
+# IDE / OS
 .DS_Store
-Thumbs.db
-# IDE
 .idea/
 .vscode/
-# Data
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+api.log
+
+# Data / Memory / Generated files
+memory.db
+memory.index
+memory.index.pkl
+memory_store.json
+rag_data/
+project_summary.txt
+
+# Models / AI (Large files)
+models/
+*.gguf
+*.bin
+*.safetensors
+*.onnx
+*.pth
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# Python distribution
+*.egg-info/
+dist/
+build/
+
+# Project_09: Runtime Hardening - ignore files
+best_practices.json
+session_registry.json
+WORKSPACE_CONTINUITY.md
+ai_agent/memory_stabilization_report.txt
+ai_agent/workspace/continuation/README.md
+ai_agent/workspace/startup_bootstrap.py
+ai_agent/workspace/test_startup_bootstrap.py
+ai_agent/runtime_safety/test_collapse_prevention.py
+ai_agent/runtime_safety/test_safety_guard.py
+archive/
+test_lmstudio.py
+test_orchestrator.py
+test_qwen.py
+
+# Project_046 specific
 data/
