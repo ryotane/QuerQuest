@@ -61,6 +61,8 @@ The project includes basic AI model integration:
 - `AIModel`: Base class for AI models
 - `TextAnalyzer`: Text analysis model for NLP tasks
 - `DataProcessor`: Data processing pipeline for AI models
+- `AdvancedDataProcessor`: Advanced data processing pipeline with multiple steps
+- `DataPipeline`: High-level data pipeline for complex data processing
 
 ### Extensibility
 

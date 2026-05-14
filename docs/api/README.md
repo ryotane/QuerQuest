@@ -73,6 +73,59 @@ result = processor.process([1, 3, 5, 7, 9])
 print(result)  # [5.0, 7.0, 9.0]
 ```
 
+### `src.ai.pipeline`
+
+Advanced data processing pipeline with multiple steps.
+
+#### Classes
+
+##### `AdvancedDataProcessor`
+
+Advanced data processing pipeline with multiple steps.
+
+**Methods:**
+- `add_step(step_name: str, step_func: Callable, config: Optional[Dict[str, Any]] = None)`: Add a processing step to the pipeline.
+- `process(data: Any) -> Any`: Process data through all steps in the pipeline.
+- `add_normalization(method: str = "minmax")`: Add normalization step to the pipeline.
+- `add_filtering(threshold: float = 0.5, condition: str = "greater")`: Add filtering step to the pipeline.
+- `add_transformation(transform_func: Callable)`: Add a custom transformation step.
+- `get_results() -> Dict[str, Any]`: Get all processing results.
+- `reset()`: Reset the pipeline.
+
+**Example:**
+```python
+from src.ai.pipeline import AdvancedDataProcessor
+
+processor = AdvancedDataProcessor("my_processor")
+processor.add_normalization("minmax")
+processor.add_filtering(5, "greater")
+result = processor.process([0, 10, 20, 30])
+print(result)  # [0.5, 1.0]
+```
+
+##### `DataPipeline`
+
+High-level data pipeline for complex data processing.
+
+**Methods:**
+- `add_processor(name: str, processor: AdvancedDataProcessor)`: Add a processor to the pipeline.
+- `process_all(data: Any) -> Dict[str, Any]`: Process data through all processors.
+- `add_metadata(key: str, value: Any)`: Add metadata to the pipeline.
+- `get_metadata() -> Dict[str, Any]`: Get all metadata.
+
+**Example:**
+```python
+from src.ai.pipeline import DataPipeline, AdvancedDataProcessor
+
+pipeline = DataPipeline()
+processor1 = AdvancedDataProcessor("proc1")
+processor1.add_step("step1", lambda x: [i * 2 for i in x])
+
+pipeline.add_processor("proc1", processor1)
+results = pipeline.process_all([1, 2, 3])
+print(results)  # {'proc1': [2, 4, 6]}
+```
+
 ### `src.main`
 
 Main application module.
