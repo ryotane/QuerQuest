@@ -54,6 +54,14 @@ The project provides basic data processing functionality:
 - Process data with custom transformations
 - Analyze data with statistical metrics
 
+### AI Model Integration
+
+The project includes basic AI model integration:
+
+- `AIModel`: Base class for AI models
+- `TextAnalyzer`: Text analysis model for NLP tasks
+- `DataProcessor`: Data processing pipeline for AI models
+
 ### Extensibility
 
 The project is designed to be easily extensible:
